@@ -1,0 +1,119 @@
+services:
+  # Service
+  service_name_fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: fastapi_dev
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/app
+    environment:
+      - ENVIRONMENT=test
+      - DB_URL=postgresql+asyncpg://user:password@postgres:5432/service_name
+      - CACHE_TTL=5
+      - KEYCLOAK_CLIENT_ID=python_backend_template
+      - KEYCLOAK_CLIENT_SECRET_KEY=9d2e4e82-aa7f-428e-b37e-ca50207ccb20
+    restart: always
+    depends_on:
+      - nats
+      - postgres
+      - redis
+      - keycloak
+  integration_tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    volumes:
+      - ./:/app
+    environment:
+      - LOG_LEVEL=ERROR
+      - SERVER_URL=http://service_name_fastapi:8000
+      - ENVIRONMENT=test
+      - DB_URL=postgresql+asyncpg://user:password@postgres:5432/service_name
+      - CACHE_TTL=5
+      - KEYCLOAK_CLIENT_ID=python_backend_template
+      - KEYCLOAK_CLIENT_SECRET_KEY=9d2e4e82-aa7f-428e-b37e-ca50207ccb20
+    depends_on:
+      - service_name_fastapi
+
+  # Infrastructure
+  # Observability
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    ports:
+      - 9090:9090
+    volumes:
+      - ./.configs/prometheus:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+  alertmanager:
+    image: prom/alertmanager:latest
+    volumes:
+      - ./.configs/alertmanager:/etc/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+  grafana:
+    image: grafana/grafana:latest
+    restart: always
+    ports:
+      - 3000:3000
+    volumes:
+      - ./.configs/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+  otel:
+    image: otel/opentelemetry-collector:latest
+    ports:
+      - 4317:4317
+      - 55679:55679
+
+  # DB
+  postgres:
+    image: postgres:latest
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: service_name
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
+
+  # Cache
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - 6379:6379
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    ports:
+      - 6380:8081
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+
+  # Broker
+  nats:
+    image: nats:alpine
+    restart: always
+    ports:
+      - 4222:4222
+    command:
+      - '--jetstream'
+
+  # Authentication
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.4
+    restart: always
+    ports:
+      - 8080:8080
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    command: ['start-dev', '--import-realm']
+    volumes:
+      - ./.configs/keycloak/realm.json:/opt/keycloak/data/import/realm.json

@@ -1,0 +1,6 @@
+.github/
+.dockerignore
+.gitignore
+*.MD
+__pycache__
+seeds/

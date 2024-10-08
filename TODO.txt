@@ -1,0 +1,3 @@
+config for envs (for lib)
+debug logging
+fix casing, typing, style in files
