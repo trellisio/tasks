@@ -42,7 +42,7 @@ unit:
 	pytest -vv --capture=tee-sys --asyncio-mode=auto tests/unit/
 
 int:
-	./wait-for.sh http://service_name_fastapi:8000/healthz ./wait-for.sh http://keycloak:8080/realms/trellis/.well-known/openid-configuration pytest -vv tests/integration --capture=tee-sys --asyncio-mode=auto
+	./wait-for.sh http://tasks_fastapi:8000/healthz ./wait-for.sh http://keycloak:8080/realms/trellis/.well-known/openid-configuration pytest -vv tests/integration --capture=tee-sys --asyncio-mode=auto
 
 # Git Hooks
 pre-commit: check scan unit # execute in .git/hooks

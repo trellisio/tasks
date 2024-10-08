@@ -745,7 +745,7 @@
       ]
     },
     {
-      "clientId": "python_backend_template",
+      "clientId": "tasks",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,

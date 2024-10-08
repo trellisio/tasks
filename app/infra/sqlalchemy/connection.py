@@ -19,7 +19,7 @@ class SqlConnectionConfig(BaseSettings):
         description="URL to connect to Postgres",
         default="sqlite+aiosqlite:///:memory:",
         examples=[
-            "postgresql+asyncpg://user:password@postgres:5432/service_name",
+            "postgresql+asyncpg://user:password@postgres:5432/tasks",
             "sqlite+aiosqlite:///:memory:",
         ],
     )

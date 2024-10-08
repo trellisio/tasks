@@ -1,6 +1,6 @@
 services:
   # Service
-  service_name_fastapi:
+  tasks_fastapi:
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,9 +11,9 @@ services:
       - ./:/app
     environment:
       - ENVIRONMENT=test
-      - DB_URL=postgresql+asyncpg://user:password@postgres:5432/service_name
+      - DB_URL=postgresql+asyncpg://user:password@postgres:5432/tasks
       - CACHE_TTL=5
-      - KEYCLOAK_CLIENT_ID=python_backend_template
+      - KEYCLOAK_CLIENT_ID=tasks
       - KEYCLOAK_CLIENT_SECRET_KEY=9d2e4e82-aa7f-428e-b37e-ca50207ccb20
     restart: always
     depends_on:
@@ -30,14 +30,14 @@ services:
       - ./:/app
     environment:
       - LOG_LEVEL=ERROR
-      - SERVER_URL=http://service_name_fastapi:8000
+      - SERVER_URL=http://tasks_fastapi:8000
       - ENVIRONMENT=test
-      - DB_URL=postgresql+asyncpg://user:password@postgres:5432/service_name
+      - DB_URL=postgresql+asyncpg://user:password@postgres:5432/tasks
       - CACHE_TTL=5
-      - KEYCLOAK_CLIENT_ID=python_backend_template
+      - KEYCLOAK_CLIENT_ID=tasks
       - KEYCLOAK_CLIENT_SECRET_KEY=9d2e4e82-aa7f-428e-b37e-ca50207ccb20
     depends_on:
-      - service_name_fastapi
+      - tasks_fastapi
 
   # Infrastructure
   # Observability
@@ -78,7 +78,7 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_DB: service_name
+      POSTGRES_DB: tasks
       POSTGRES_PASSWORD: password
       POSTGRES_USER: user
 

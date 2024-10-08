@@ -12,7 +12,7 @@ scrape_configs:
     # scheme defaults to 'http'.
     static_configs:
       - targets: ['prometheus:9090']
-  - job_name: 'python_backend_template'
+  - job_name: 'tasks'
     static_configs:
-      - targets: ['service_name_fastapi:8000']
+      - targets: ['tasks_fastapi:8000']
     metrics_path: '/metrics' # Specify your custom metrics endpoint here

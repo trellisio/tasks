@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "service_name"
+name = "tasks"
 version = "0.1.0"
 description = ""
 authors = ["Robbie Hughes <rwhughes91@gmail.com>"]
