@@ -14,13 +14,9 @@ pydantic-settings = "^2.2.1"
 kink = "^0.8.0"
 
 [tool.poetry.group.current_infra.dependencies]
-redis = {extras = ["hiredis"], version = "^5.0.4"}
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.30"}
 asyncpg = "^0.29.0"
 alembic = "^1.13.1"
-nats-py = "^2.7.2"
-prometheus-client = "^0.21.0"
-python-keycloak = "^4.5.1"
 
 [tool.poetry.group.entrypoint_fastapi]
 optional = true
