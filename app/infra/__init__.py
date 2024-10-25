@@ -1,29 +1,28 @@
 # ruff: noqa: F403
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from kink import di, inject
 
 from app.config import config
 
-if TYPE_CHECKING:
-    from .connection import Connection
+from .connection import Connection
 
 # Initialize Infra
 match config.ENVIRONMENT:
     case "local":
         from .memory.publisher import *
+        from .sqlalchemy.uow import *
     case _:
         from .nats.publisher import *
+        from .sqlalchemy.uow import *
 
 
 @inject()
 class InfraInitializer:
     connections: list[Connection]
 
-    def __init__(self, connections: list[Connection]):
-        self.connections = connections
+    def __init__(self, *, connections: Connection):
+        self.connections = [connections]
 
     async def init_connections(self) -> None:
         for connection in self.connections:

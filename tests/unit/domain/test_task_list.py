@@ -1,6 +1,6 @@
 import pytest
 
-from app.domain.models.task_list import InvalidStatus, TaskList, TaskRepository
+from app.domain.models.task_list import InvalidStatusError, TaskList, TaskRepository
 
 
 class TaskRepositoryPlaceholder(TaskRepository):
@@ -38,10 +38,10 @@ class TestTaskList:
         self.task_list.default_status = "ready"
         assert self.task_list.default_status == "ready"
 
-        with pytest.raises(InvalidStatus):
+        with pytest.raises(InvalidStatusError):
             self.task_list.default_status = "backlog"
 
-        with pytest.raises(InvalidStatus):
+        with pytest.raises(InvalidStatusError):
             TaskList(
                 identifier=1,
                 name="todo",
@@ -49,7 +49,7 @@ class TestTaskList:
                 default_status="backlog",
             )
 
-        with pytest.raises(InvalidStatus):
+        with pytest.raises(InvalidStatusError):
             TaskList(
                 identifier=1,
                 name="todo",
@@ -72,7 +72,7 @@ class TestTaskList:
 
     async def test_can_remove_status_from_list(self) -> None:
         self.task_list.add_status("READY")
-        await self.task_list.remove_status("READY", TaskRepositoryPlaceholder())
+        await self.task_list.remove_status(status="READY", task_repo=TaskRepositoryPlaceholder())
 
         assert isinstance(self.task_list.statuses, set)
         assert "READY" not in self.task_list.statuses

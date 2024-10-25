@@ -1,7 +1,7 @@
 import pytest
 
 from app.domain.models import Task, TaskList
-from app.domain.models.errors import InvalidStatus
+from app.domain.models.errors import InvalidStatusError
 
 
 class TestTask:
@@ -33,7 +33,7 @@ class TestTask:
         assert "test" not in self.task.tags
 
     def test_error_raised_if_status_not_in_task_list(self) -> None:
-        with pytest.raises(InvalidStatus):
+        with pytest.raises(InvalidStatusError):
             Task(
                 title="Finish Feature",
                 description="Random text describing the task to be completed",

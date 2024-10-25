@@ -1,12 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from ..aggregate import Aggregate
-from .errors import InvalidStatus
-
-if TYPE_CHECKING:
-    from .task_list import TaskList
+from .errors import InvalidStatusError
+from .task_list import TaskList
 
 
 class Task(Aggregate):
@@ -50,7 +46,7 @@ class Task(Aggregate):
     @status.setter
     def status(self, new_status: str) -> None:
         if new_status not in self.task_list.statuses:
-            raise InvalidStatus(status=new_status)
+            raise InvalidStatusError(status=new_status)
 
         self._status = new_status
 

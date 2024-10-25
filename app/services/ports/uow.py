@@ -6,16 +6,14 @@ from inspect import signature
 from typing import TYPE_CHECKING, Any, Literal
 
 from app.domain.aggregate import Aggregate
+from app.domain.event import Event
 from app.domain.models import Task, TaskList
 
 from ..reflection import Reflector
+from .publisher import Publisher
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
-
-    from app.domain.event import Event
-
-    from .publisher import Publisher
 
 
 class Repository[T: Aggregate](ABC):

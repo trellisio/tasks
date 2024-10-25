@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 from kink import inject
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.domain import models
+from app.services.ports import Publisher
 from app.services.ports.uow import TaskListRepository, TaskRepository, Uow
 
-if TYPE_CHECKING:
-    from app.domain import models
-    from app.services.ports import Publisher
-
-    from .connection import SqlConnection
+from .connection import SqlConnection
 
 
 class SqlAlchemyTaskListRepository(TaskListRepository):
