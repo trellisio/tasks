@@ -1,6 +1,12 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from ..aggregate import Aggregate
 from .errors import InvalidStatus
-from .task_list import TaskList
+
+if TYPE_CHECKING:
+    from .task_list import TaskList
 
 
 class Task(Aggregate):
@@ -30,34 +36,34 @@ class Task(Aggregate):
         self._tags = tags
 
     @property
-    def title(self):
+    def title(self) -> str:
         return self._title
 
     @property
-    def description(self):
+    def description(self) -> str:
         return self._description
 
     @property
-    def status(self):
+    def status(self) -> str:
         return self._status
 
     @status.setter
-    def status(self, new_status: str):
+    def status(self, new_status: str) -> None:
         if new_status not in self.task_list.statuses:
             raise InvalidStatus(status=new_status)
 
         self._status = new_status
 
     @property
-    def task_list(self):
+    def task_list(self) -> TaskList:
         return self._task_list
 
     @property
-    def tags(self):
+    def tags(self) -> set[str]:
         return self._tags
 
-    def add_tag(self, tag: str):
+    def add_tag(self, tag: str) -> None:
         self._tags.add(tag)
 
-    def remove_tag(self, tag: str):
+    def remove_tag(self, tag: str) -> None:
         self._tags.remove(tag)

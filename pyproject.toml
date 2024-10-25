@@ -17,6 +17,7 @@ kink = "^0.8.0"
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.30"}
 asyncpg = "^0.29.0"
 alembic = "^1.13.1"
+nats-py = "^2.9.0"
 
 [tool.poetry.group.entrypoint_fastapi]
 optional = true
@@ -57,3 +58,24 @@ mkdocs = "*"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+preview = true
+select = ["ALL"]
+fixable = ["ALL"]
+extend-select = ["PLR0917"]
+ignore = ["CPY", "D", "ANN204", "TID252", "PLR0913"]
+
+[tool.ruff.lint.pylint]
+max-positional-args = 1
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+"**/{tests,docs,tools}/*" = ["E402", "S101"]
+
+[tool.ruff.format]
+preview = true
+quote-style = "double"

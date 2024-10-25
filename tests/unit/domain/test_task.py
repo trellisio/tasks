@@ -9,9 +9,11 @@ class TestTask:
     task: Task
 
     @pytest.fixture(autouse=True)
-    def set_up(self):
+    def _set_up(self) -> None:
         task_list = TaskList(
-            identifier=1, name="todo", statuses={"ready", "working", "done"}
+            identifier=1,
+            name="todo",
+            statuses={"ready", "working", "done"},
         )
         self.task = Task(
             title="Finish Feature",
@@ -21,16 +23,16 @@ class TestTask:
             tags={"example"},
         )
 
-    def test_can_add_tag(self):
+    def test_can_add_tag(self) -> None:
         self.task.add_tag("test")
         assert "test" in self.task.tags
 
-    def test_can_remove_tag(self):
+    def test_can_remove_tag(self) -> None:
         self.task.add_tag("test")
         self.task.remove_tag("test")
         assert "test" not in self.task.tags
 
-    def test_error_raised_if_status_not_in_task_list(self):
+    def test_error_raised_if_status_not_in_task_list(self) -> None:
         with pytest.raises(InvalidStatus):
             Task(
                 title="Finish Feature",
@@ -40,6 +42,6 @@ class TestTask:
                 tags={"example"},
             )
 
-    def test_error_raised_when_task_list_set(self):
+    def test_error_raised_when_task_list_set(self) -> None:
         with pytest.raises(AttributeError):
             self.task.task_list = TaskList(identifier=2, name="todo2", statuses={})

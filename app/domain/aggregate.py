@@ -1,4 +1,9 @@
-from .event import Event
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .event import Event
 
 
 class Aggregate:
@@ -16,9 +21,5 @@ class Aggregate:
 
         return self._events
 
-    @events.setter
-    def events(self):
-        raise ValueError("Cannot set events field")
-
-    def emit(self, event: Event):
+    def emit(self, event: Event) -> None:
         self.events.append(event)
