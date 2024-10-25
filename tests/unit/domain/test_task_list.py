@@ -1,20 +1,35 @@
+from __future__ import annotations
+
 import pytest
 
+from app.domain.models.task import Task
 from app.domain.models.task_list import InvalidStatusError, TaskList, TaskRepository
 
 
-class TaskRepositoryPlaceholder(TaskRepository):
-    async def update_all_tasks_with_status(  # noqa: PLR6301
+class InMemoryTaskRepository(TaskRepository):
+    tasks: list[Task]
+
+    def __init__(self, task_list: TaskList):
+        self.tasks = [
+            Task(task_list=task_list, title="example", status="ready", description="task 1"),
+            Task(task_list=task_list, title="example", status="ready", description="task 2"),
+            Task(task_list=task_list, title="example", status="working", description="task 3"),
+            Task(task_list=task_list, title="example", status="nonsense", description="task 4"),
+        ]
+
+    async def update_all_tasks_with_status(
         self,
         *,
         list_id: int,  # noqa: ARG002
-        old_status: str,  # noqa: ARG002
-        new_status: str,  # noqa: ARG002
+        old_status: str,
+        new_status: str,
     ) -> None:
-        return
+        tasks = [task for task in self.tasks if task.status == old_status]
+        for task in tasks:
+            task.status = new_status
 
-    async def delete_all_tasks_with_status(self, *, list_id: int, status: str) -> None:  # noqa: ARG002, PLR6301
-        return
+    async def delete_all_tasks_with_status(self, *, list_id: int, status: str) -> None:  # noqa: ARG002
+        self.tasks = [task for task in self.tasks if task.status != status]
 
 
 class TestTaskList:
@@ -71,9 +86,37 @@ class TestTaskList:
         assert len(self.task_list.statuses) == expected_status_count
 
     async def test_can_remove_status_from_list(self) -> None:
+        self.task_list.add_status("ready")
+        self.task_list.add_status("working")
+        self.task_list.add_status("nonsense")
+
+        repo = InMemoryTaskRepository(self.task_list)
         self.task_list.add_status("READY")
-        await self.task_list.remove_status(status="READY", task_repo=TaskRepositoryPlaceholder())
+        await self.task_list.remove_status(status="READY", task_repo=repo)
 
         assert isinstance(self.task_list.statuses, set)
         assert "READY" not in self.task_list.statuses
         assert "READY" not in self.task_list.statuses
+
+    async def test_tasks_in_list_are_deleted_when_status_is_removed_with_no_mapping(self) -> None:
+        self.task_list.add_status("ready")
+        self.task_list.add_status("working")
+        self.task_list.add_status("nonsense")
+
+        repo = InMemoryTaskRepository(self.task_list)
+        self.task_list.add_status("nonsense")
+        await self.task_list.remove_status(status="nonsense", task_repo=repo)
+
+        assert "nonsense" not in [task.status for task in repo.tasks]
+
+    async def test_tasks_in_list_are_updated_when_status_is_removed_with_mapping(self) -> None:
+        self.task_list.add_status("ready")
+        self.task_list.add_status("working")
+        self.task_list.add_status("nonsense")
+
+        repo = InMemoryTaskRepository(self.task_list)
+        self.task_list.add_status("nonsense")
+        await self.task_list.remove_status(status="nonsense", task_repo=repo, migration_status="ready")
+
+        assert "nonsense" not in [task.status for task in repo.tasks]
+        assert len([task.status for task in repo.tasks if task.status == "ready"]) == 3
