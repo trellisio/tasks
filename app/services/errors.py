@@ -8,7 +8,7 @@ class Detail(TypedDict):
     field: str | None
 
 
-class ServiceExceptionError(Exception):
+class ServiceError(Exception):
     msg: str
     detail: list[Detail] | None
 
@@ -24,16 +24,16 @@ class ServiceExceptionError(Exception):
         return payload
 
 
-class NoResourceExceptionError(ServiceExceptionError):
+class NoResourceError(ServiceError):
     def __init__(self, *, msg: str = "Resource does not exist"):
-        super().__init__(msg)
+        super().__init__(msg=msg)
 
 
-class ResourceExistsExceptionError(ServiceExceptionError):
+class ResourceExistsError(ServiceError):
     def __init__(self, *, msg: str = "Resource exists"):
-        super().__init__(msg)
+        super().__init__(msg=msg)
 
 
-class ValidationError(ServiceExceptionError):
+class ValidationError(ServiceError):
     def __init__(self, *, detail: list[Detail], msg: str = "Invalid parameters passed"):
-        super().__init__(msg, detail)
+        super().__init__(msg=msg, detail=detail)

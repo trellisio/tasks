@@ -1,7 +1,9 @@
-from abc import ABC, abstractmethod
-from typing import TypedDict
+from __future__ import annotations
 
-from app.domain.event import Payload
+from abc import ABC, abstractmethod
+from typing import Any, TypedDict
+
+Payload = dict[str, Any] | str
 
 
 class Events(TypedDict):

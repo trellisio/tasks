@@ -19,8 +19,7 @@ services:
     depends_on:
       - nats
       - postgres
-      - redis
-      - keycloak
+
   integration_tests:
     build:
       context: .
@@ -39,39 +38,6 @@ services:
     depends_on:
       - tasks_fastapi
 
-  # Infrastructure
-  # Observability
-  prometheus:
-    image: prom/prometheus:latest
-    restart: always
-    ports:
-      - 9090:9090
-    volumes:
-      - ./.configs/prometheus:/etc/prometheus/
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-  alertmanager:
-    image: prom/alertmanager:latest
-    volumes:
-      - ./.configs/alertmanager:/etc/alertmanager
-    command:
-      - '--config.file=/etc/alertmanager/config.yml'
-  grafana:
-    image: grafana/grafana:latest
-    restart: always
-    ports:
-      - 3000:3000
-    volumes:
-      - ./.configs/grafana/provisioning:/etc/grafana/provisioning
-    depends_on:
-      - prometheus
-  otel:
-    image: otel/opentelemetry-collector:latest
-    ports:
-      - 4317:4317
-      - 55679:55679
-
-  # DB
   postgres:
     image: postgres:latest
     restart: always
@@ -82,21 +48,6 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: user
 
-  # Cache
-  redis:
-    image: redis:latest
-    restart: always
-    ports:
-      - 6379:6379
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    restart: always
-    ports:
-      - 6380:8081
-    environment:
-      - REDIS_HOSTS=local:redis:6379
-
-  # Broker
   nats:
     image: nats:alpine
     restart: always
@@ -104,16 +55,3 @@ services:
       - 4222:4222
     command:
       - '--jetstream'
-
-  # Authentication
-  keycloak:
-    image: quay.io/keycloak/keycloak:25.0.4
-    restart: always
-    ports:
-      - 8080:8080
-    environment:
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-    command: ['start-dev', '--import-realm']
-    volumes:
-      - ./.configs/keycloak/realm.json:/opt/keycloak/data/import/realm.json

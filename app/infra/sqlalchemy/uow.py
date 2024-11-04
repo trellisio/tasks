@@ -1,17 +1,43 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, cast
 
 from kink import inject
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.future import select
 
-from app.domain import models
-from app.services.ports import Publisher
-from app.services.ports.uow import TaskListRepository, TaskRepository, Uow
+from app.domain.models import Task, TaskList, ports
+from app.services.ports.uow import TaskListRepository, Uow
 
 from .connection import SqlConnection
 
 
+# DAOs
+class SqlAlchemyTaskDao(ports.TaskDao):
+    session: AsyncSession
+
+    def __init__(self, session: AsyncSession):
+        super().__init__()
+        self.session = session
+
+    async def update_all_tasks_with_status(
+        self,
+        *,
+        task_list_pk: int,
+        status: str,
+        migration_status: str,
+    ) -> None:
+        stmt = (
+            update(Task)
+            .where(Task._task_list._pk == task_list_pk)  # type: ignore[arg-type] # noqa: SLF001
+            .where(Task._status == status)  # type: ignore[arg-type] # noqa: SLF001
+            .values(status=migration_status)
+        )
+        await self.session.execute(stmt)
+
+
+# Repositories
 class SqlAlchemyTaskListRepository(TaskListRepository):
     session: AsyncSession
 
@@ -19,19 +45,22 @@ class SqlAlchemyTaskListRepository(TaskListRepository):
         super().__init__()
         self.session = session
 
-    async def add(self, task_list: models.TaskList) -> None:
+    async def add(self, task_list: TaskList) -> None:
         self.session.add(task_list)
 
+    async def add_tasks(self, tasks: list[Task]) -> None:
+        for task in tasks:
+            self.session.add(task)
 
-class SqlAlchemyTaskRepository(TaskRepository):
-    session: AsyncSession
+    async def find(self, pk: int) -> list[TaskList]:
+        stmt = select(TaskList).where(TaskList._pk == pk)  # type: ignore[arg-type]  # noqa: SLF001
+        res = await self.session.execute(stmt)
+        return cast(list[TaskList], res.scalars().all())
 
-    def __init__(self, session: AsyncSession):
-        super().__init__()
-        self.session = session
-
-    async def add(self, task: models.Task) -> None:
-        self.session.add(task)
+    async def find_by_name(self, name: str) -> list[TaskList]:
+        stmt = select(TaskList).where(TaskList._name == name)  # type: ignore[arg-type]  # noqa: SLF001
+        res = await self.session.execute(stmt)
+        return cast(list[TaskList], res.scalars().all())
 
 
 @inject(alias=Uow, use_factory=True)
@@ -39,31 +68,36 @@ class SqlAlchemyUow(Uow):
     # repositories
     task_list_repository: SqlAlchemyTaskListRepository
 
+    # DAOs
+    task_dao: SqlAlchemyTaskDao
+
     # Internals
     _isolation_level: Literal["REPEATABLE READ", "READ COMMITTED"]
     _session: AsyncSession
+    _default_session_factory: async_sessionmaker[AsyncSession]
     _rr_session_factory: async_sessionmaker[AsyncSession]
-    _rc_session_factory: async_sessionmaker[AsyncSession]
 
-    def __init__(self, *, connection: SqlConnection, publisher: Publisher):
-        super().__init__(publisher)
-        rr_engine = connection.repeatable_read_engine
+    def __init__(self, *, connection: SqlConnection):
+        super().__init__()
         def_engine = connection.default_engine
+        rr_engine = connection.repeatable_read_engine
 
-        self._rr_session_factory = async_sessionmaker(
-            rr_engine,
-            expire_on_commit=False,
-        )
         self._default_session_factory = async_sessionmaker(
             def_engine,
             expire_on_commit=False,
         )
 
+        self._rr_session_factory = async_sessionmaker(
+            rr_engine,
+            expire_on_commit=False,
+        )
+
     async def __aenter__(self):
-        session_factory = self._get_session_factory("DEFAULT")
+        session_factory = self._get_session_factory()
         async with session_factory() as session, session.begin():
             self._session = session
             self.task_list_repository = SqlAlchemyTaskListRepository(session)
+            self.task_dao = SqlAlchemyTaskDao(session)
 
     async def commit(self) -> None:
         await self._session.commit()
@@ -78,8 +112,7 @@ class SqlAlchemyUow(Uow):
     # Internals
     def _get_session_factory(
         self,
-        isolation_level: Literal["DEFAULT", "REPEATABLE READ"],
-    ) -> None:
-        if isolation_level == "REPEATABLE READ":
+    ) -> async_sessionmaker[AsyncSession]:
+        if self._isolation_level == "REPEATABLE READ":
             return self._rr_session_factory
         return self._default_session_factory

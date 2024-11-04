@@ -11,7 +11,6 @@ class TestTask:
     @pytest.fixture(autouse=True)
     def _set_up(self) -> None:
         task_list = TaskList(
-            identifier=1,
             name="todo",
             statuses={"ready", "working", "done"},
         )
@@ -44,4 +43,4 @@ class TestTask:
 
     def test_error_raised_when_task_list_set(self) -> None:
         with pytest.raises(AttributeError):
-            self.task.task_list = TaskList(identifier=2, name="todo2", statuses={})
+            self.task.task_list = TaskList(name="todo2", statuses=set())  # type: ignore[misc]

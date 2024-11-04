@@ -1,5 +1,5 @@
-from sqlalchemy import UUID, Column, Integer, MetaData, Table
-from sqlalchemy.orm import registry
+from sqlalchemy import JSON, Column, ForeignKey, Integer, MetaData, String, Table, Text
+from sqlalchemy.orm import registry, relationship
 
 from app.domain import models
 
@@ -11,7 +11,9 @@ task_list = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("version", Integer, nullable=False, default=0),
-    Column("identifier", UUID, nullable=False, unique=True, index=True),
+    Column("name", String(255), nullable=False),
+    Column("statuses", JSON, nullable=True),
+    Column("default_status", String(255), nullable=True),
 )
 
 task = Table(
@@ -19,6 +21,11 @@ task = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("version", Integer, nullable=False, default=0),
+    Column("title", String(255), nullable=False),
+    Column("description", Text, nullable=True),
+    Column("status", String(255), nullable=False),
+    Column("tags", JSON, nullable=True),
+    Column("task_list_id", Integer, ForeignKey("task_list.id"), nullable=False),
 )
 
 
@@ -27,8 +34,28 @@ mapper_registry = registry()
 
 
 def add_model_mappings() -> None:
-    mapper_registry.map_imperatively(models.TaskList, task_list)
-    mapper_registry.map_imperatively(models.Task, task)
+    mapper_registry.map_imperatively(
+        models.TaskList,
+        task_list,
+        properties={
+            "_pk": task_list.c.id,
+            "_version": task_list.c.version,
+            "_name": task_list.c.name,
+            "_statuses": task_list.c.statuses,
+            "_default_status": task_list.c.default_status,
+        },
+    )
+    mapper_registry.map_imperatively(
+        models.Task,
+        task,
+        properties={
+            "_title": task.c.title,
+            "_description": task.c.description,
+            "_status": task.c.status,
+            "_tags": task.c.tags,
+            "_task_list": relationship(models.TaskList),
+        },
+    )
 
 
 def remove_model_mappings() -> None:

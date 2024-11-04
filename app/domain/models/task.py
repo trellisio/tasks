@@ -7,18 +7,20 @@ from .task_list import TaskList
 
 class Task(Aggregate):
     _title: str
-    _description: str
+    _description: str | None
     _status: str
-    _task_list: TaskList
     _tags: set[str]
+
+    # task_list
+    _task_list: TaskList
 
     def __init__(
         self,
         *,
         title: str,
-        description: str,
         status: str,
         task_list: TaskList,
+        description: str | None = None,
         tags: set[str] | None = None,
     ):
         self._title = title
@@ -36,7 +38,7 @@ class Task(Aggregate):
         return self._title
 
     @property
-    def description(self) -> str:
+    def description(self) -> str | None:
         return self._description
 
     @property

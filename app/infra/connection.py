@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 class Connection(ABC):
     @abstractmethod
-    async def connect() -> None:
+    async def connect(self) -> None:
         pass
 
     @abstractmethod

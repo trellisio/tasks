@@ -6,11 +6,10 @@ from inspect import signature
 from typing import TYPE_CHECKING, Any, Literal
 
 from app.domain.aggregate import Aggregate
-from app.domain.event import Event
-from app.domain.models import Task, TaskList
+from app.domain.event import DomainEvent
+from app.domain.models import Task, TaskList, ports
 
 from ..reflection import Reflector
-from .publisher import Publisher
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -37,7 +36,7 @@ class Repository[T: Aggregate](ABC):
         self,
         startswith: Literal["find", "remove", "add"],
     ) -> list[str]:
-        return Reflector.get_methods(self, startswith)
+        return Reflector.get_methods(obj=self, startswith=startswith)
 
     def _decorate_method(
         self,
@@ -76,7 +75,7 @@ class Repository[T: Aggregate](ABC):
         @wraps(method)
         async def fn(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
             # inspect passed method and find param name mapping to T
-            sig = signature(method)
+            sig = signature(method, eval_str=True)
             parameters = sig.parameters
             keys = list(parameters.keys())
 
@@ -84,7 +83,6 @@ class Repository[T: Aggregate](ABC):
                 key = keys[i]
                 param_metadata = parameters[key]
                 annotation = param_metadata.annotation
-
                 if issubclass(annotation, Aggregate):
                     # Found parameter with annotation to model
                     model = kwargs[key] if key in kwargs else args[i]
@@ -99,27 +97,25 @@ class Repository[T: Aggregate](ABC):
         return fn
 
     @abstractmethod
-    async def add(self) -> None:
+    async def add(self, agg: T) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    async def find(self) -> list[T]:
+    async def find(self, pk: int) -> list[T]:
         raise NotImplementedError
 
-    @abstractmethod
-    async def remove(self) -> list[T]:
-        raise NotImplementedError
+    # @abstractmethod
+    # async def remove(self, agg: T) -> None:
+    #     raise NotImplementedError
 
 
 class TaskListRepository(Repository[TaskList], ABC):
     @abstractmethod
-    async def add(self, task_list: TaskList) -> None:
+    async def add_tasks(self, tasks: list[Task]) -> None:
         raise NotImplementedError
 
-
-class TaskRepository(Repository[Task], ABC):
     @abstractmethod
-    async def add(self, task: Task) -> None:
+    async def find_by_name(self, name: str) -> list[TaskList]:
         raise NotImplementedError
 
 
@@ -127,12 +123,13 @@ class Uow(ABC):
     # repositories
     task_list_repository: TaskListRepository
 
+    # domain DAOs
+    task_dao: ports.TaskDao
+
     # Internals
-    _publisher: Publisher
     _isolation_level: Literal["REPEATABLE READ", "READ COMMITTED"]
 
-    def __init__(self, publisher: Publisher):
-        self._publisher = publisher
+    def __init__(self):
         self._decorate_defined_commit_method()
         self._isolation_level = "READ COMMITTED"
 
@@ -163,7 +160,7 @@ class Uow(ABC):
     def begin(
         self,
         isolation_level: Literal["REPEATABLE READ", "READ COMMITTED"] = "READ COMMITTED",
-    ) -> None:
+    ) -> Uow:
         self._isolation_level = isolation_level
         return self
 
@@ -178,8 +175,8 @@ class Uow(ABC):
 
         return aggs
 
-    def _collect_events(self) -> list[Event]:
-        events: list[Event] = []
+    def _collect_events(self) -> list[DomainEvent]:
+        events: list[DomainEvent] = []
         seen_aggs = self._collect_seen_aggregates()
         for agg in seen_aggs:
             events.extend(agg.events)
@@ -193,14 +190,10 @@ class Uow(ABC):
 
         @wraps(commit)
         async def fn(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
-            domain_events = self._collect_events()
-            for event in domain_events:
-                await self._publisher.publish(event.channel, event.data)
-
             seen_aggs = self._collect_seen_aggregates(clear=True)
             for agg in seen_aggs:
                 agg.version += 1
 
             await commit(*args, **kwargs)
 
-        self.commit = fn
+        self.commit = fn  # type: ignore[assignment]

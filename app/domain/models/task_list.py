@@ -1,52 +1,47 @@
 from __future__ import annotations
 
-from typing import Protocol
-
 from ..aggregate import Aggregate
-from .errors import InvalidStatusError
+from .errors import ArchivedStatusError, InvalidStatusError
+from .ports import TaskDao
 
-
-# Interfaces
-class TaskRepository(Protocol):
-    async def update_all_tasks_with_status(
-        self,
-        *,
-        list_id: int,
-        old_status: str,
-        new_status: str,
-    ) -> None: ...
-
-    async def delete_all_tasks_with_status(self, *, list_id: int, status: str) -> None: ...
+# Constants
+ARCHIVED_STATUS = "ARCHIVED"
 
 
 # Aggregate
 class TaskList(Aggregate):
-    _identifier: int
     _name: str
+    _pk: int | None
     _statuses: set[str]
     _default_status: str
 
     def __init__(
         self,
         *,
-        identifier: int,
         name: str,
+        pk: int | None = None,
         statuses: set[str] | None = None,
         default_status: str | None = None,
     ):
-        self._identifier = identifier
+        super().__init__()
+
+        self._pk = pk
         self._name = name
 
         if not statuses:
             statuses = set()
+        statuses.add(ARCHIVED_STATUS)
         self._statuses = statuses
 
         if default_status:
             self.default_status = default_status
 
     @property
-    def identifier(self) -> int:
-        return self._identifier
+    def pk(self) -> int:
+        if self._pk is None:
+            msg = "TaskList pk is not set"
+            raise ValueError(msg)
+        return self._pk
 
     @property
     def name(self) -> str:
@@ -64,9 +59,6 @@ class TaskList(Aggregate):
 
     @property
     def statuses(self) -> set[str]:
-        if self._statuses is None:
-            self._statuses = set()
-
         return self._statuses
 
     def add_status(self, status: str) -> None:
@@ -76,25 +68,23 @@ class TaskList(Aggregate):
         self,
         *,
         status: str,
-        task_repo: TaskRepository,
+        dao: TaskDao,
         migration_status: str | None = None,
     ) -> None:
-        # Note we are passing in a repo rather than eager load for scalability concerns
+        if status == ARCHIVED_STATUS:
+            raise ArchivedStatusError  # cannot remove this status
+
         if status not in self._statuses:
             return
 
-        # on deleting a status, if migration_status is passed, we update task's statuses
-        if migration_status:
-            await task_repo.update_all_tasks_with_status(
-                list_id=self._identifier,
-                old_status=status,
-                new_status=migration_status,
-            )
-        else:
-            # if not passed, delete tasks with this status
-            await task_repo.delete_all_tasks_with_status(
-                list_id=self._identifier,
-                status=status,
-            )
+        if migration_status and migration_status not in self._statuses:
+            raise InvalidStatusError(status=migration_status)
+
+        # Note we are passing in a repo rather than eager load for scalability concerns
+        await dao.update_all_tasks_with_status(
+            task_list_pk=self.pk,
+            status=status,
+            migration_status=migration_status or ARCHIVED_STATUS,
+        )
 
         self._statuses.remove(status)

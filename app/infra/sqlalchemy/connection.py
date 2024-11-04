@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from app.logger import logger
 
 from ..connection import Connection
+from .encoder import dumps
 from .tables import add_model_mappings, metadata, remove_model_mappings
 
 
@@ -31,8 +32,11 @@ class SqlConnectionConfig(BaseSettings):
 
 @inject(alias=Connection)
 class SqlConnection(Connection):
+    # WRITE
     repeatable_read_engine: AsyncEngine
     default_engine: AsyncEngine
+
+    # READ
 
     async def connect(self) -> None:
         config = SqlConnectionConfig()
@@ -41,6 +45,7 @@ class SqlConnection(Connection):
             config.DB_URL,
             future=True,
             echo=config.DB_ECHO,
+            json_serializer=dumps,
         )
         self.repeatable_read_engine = self.default_engine.execution_options(
             isolation_level="REPEATABLE READ",
@@ -57,7 +62,6 @@ class SqlConnection(Connection):
                 remove_model_mappings()
                 for table in metadata.sorted_tables:
                     await conn.execute(table.delete())
-                    await conn.commit()
 
         await self.default_engine.dispose()
         await self.repeatable_read_engine.dispose()

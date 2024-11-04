@@ -1,10 +1,5 @@
-from typing import Any
-
-from pydantic import BaseModel
-
-Payload = dict[str, Any] | str
+from typing import Protocol
 
 
-class Event(BaseModel):
-    channel: str
-    data: Payload
+class DomainEvent(Protocol):
+    pass

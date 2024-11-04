@@ -24,5 +24,5 @@ class NatsConnection(Connection):
         self.nc = nc
         logger.info("Nats connected 🚨")
 
-    async def close(self, *, _: bool = False) -> None:
+    async def close(self, *, cleanup: bool = False) -> None:  # noqa: ARG002
         await self.nc.close()
