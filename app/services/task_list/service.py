@@ -14,7 +14,7 @@ class TaskListWriteService:
     def __init__(self, uow: Uow):
         self.uow = uow
 
-    async def create_task_list(self, create_task_list: dtos.CreateTaskListDto) -> None:
+    async def create_task_list(self, create_task_list: dtos.CreateTaskListDto) -> int:
         task_list = TaskList(
             name=create_task_list.name,
             statuses=create_task_list.statuses,
@@ -23,6 +23,9 @@ class TaskListWriteService:
 
         async with self.uow:
             await self.uow.task_list_repository.add(task_list)
+            await self.uow.commit()
+
+        return task_list.pk
 
     async def create_task(self, create_task: dtos.CreateTaskDto) -> None:
         async with self.uow:
@@ -38,3 +41,4 @@ class TaskListWriteService:
                 tags=set(create_task.tags) if create_task.tags else None,
             )
             await self.uow.task_list_repository.add_tasks([task])
+            await self.uow.commit()

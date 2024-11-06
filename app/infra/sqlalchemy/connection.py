@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from alembic import command
 from alembic.config import Config
 from kink import inject
 from pydantic import Field
 from pydantic_settings import BaseSettings
-from sqlalchemy import Connection as SqlAlchemyConnection
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from app.logger import logger
@@ -13,6 +15,9 @@ from app.logger import logger
 from ..connection import Connection
 from .encoder import dumps
 from .tables import add_model_mappings, metadata, remove_model_mappings
+
+if TYPE_CHECKING:
+    from sqlalchemy import Connection as SqlAlchemyConnection
 
 
 class SqlConnectionConfig(BaseSettings):
@@ -51,13 +56,13 @@ class SqlConnection(Connection):
             isolation_level="REPEATABLE READ",
         )
 
-        await self.apply_migrations()
+        await self.migrate()
         add_model_mappings()
-
         logger.info("Database connected 🚨")
 
     async def close(self, *, cleanup: bool = False) -> None:
         if cleanup:
+            remove_model_mappings()
             async with self.default_engine.begin() as conn:
                 remove_model_mappings()
                 for table in metadata.sorted_tables:
@@ -66,10 +71,10 @@ class SqlConnection(Connection):
         await self.default_engine.dispose()
         await self.repeatable_read_engine.dispose()
 
-    async def apply_migrations(self) -> None:
+    async def migrate(self) -> None:
         def run_upgrade(connection: SqlAlchemyConnection, cfg: Config) -> None:  # noqa: PLR0917
             cfg.attributes["connection"] = connection
-            command.upgrade(cfg, "head")
+            command.upgrade(cfg, "heads")
 
         async with self.default_engine.begin() as conn:
             await conn.run_sync(

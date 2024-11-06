@@ -13,5 +13,5 @@ class CreateTaskDto(BaseModel):
     title: str
     status: str
     task_list_id: int
-    description: str | None
-    tags: list[str] | None
+    description: str | None = None
+    tags: list[str] | None = None

@@ -6,8 +6,11 @@ from starlette.status import HTTP_204_NO_CONTENT
 
 @inject()
 class MonitoringRoutes(Routable):
+    def __init__(self) -> None:
+        super().__init__()
+
     @get("/healthz")
-    async def healthz(self):
+    async def health(self) -> Response:  # noqa: PLR6301
         return Response(status_code=HTTP_204_NO_CONTENT)
 
 

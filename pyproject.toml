@@ -54,6 +54,8 @@ optional = true
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "*"
+sqlalchemy-schemadisplay = "^2.0"
+graphviz = "^0.20.3"
 
 [build-system]
 requires = ["poetry-core"]

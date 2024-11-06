@@ -25,7 +25,7 @@ config = FastApiConfig()
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await init_connections()
 
     # add routes to server

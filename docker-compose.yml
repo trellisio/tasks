@@ -12,9 +12,6 @@ services:
     environment:
       - ENVIRONMENT=test
       - DB_URL=postgresql+asyncpg://user:password@postgres:5432/tasks
-      - CACHE_TTL=5
-      - KEYCLOAK_CLIENT_ID=tasks
-      - KEYCLOAK_CLIENT_SECRET_KEY=9d2e4e82-aa7f-428e-b37e-ca50207ccb20
     restart: always
     depends_on:
       - nats
@@ -32,9 +29,6 @@ services:
       - SERVER_URL=http://tasks_fastapi:8000
       - ENVIRONMENT=test
       - DB_URL=postgresql+asyncpg://user:password@postgres:5432/tasks
-      - CACHE_TTL=5
-      - KEYCLOAK_CLIENT_ID=tasks
-      - KEYCLOAK_CLIENT_SECRET_KEY=9d2e4e82-aa7f-428e-b37e-ca50207ccb20
     depends_on:
       - tasks_fastapi
 
@@ -44,9 +38,9 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_DB: tasks
-      POSTGRES_PASSWORD: password
-      POSTGRES_USER: user
+      - POSTGRES_DB=tasks
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=user
 
   nats:
     image: nats:alpine

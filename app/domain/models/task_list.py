@@ -13,7 +13,7 @@ class TaskList(Aggregate):
     _name: str
     _pk: int | None
     _statuses: set[str]
-    _default_status: str
+    _default_status: str | None
 
     def __init__(
         self,
@@ -30,6 +30,7 @@ class TaskList(Aggregate):
 
         if not statuses:
             statuses = set()
+
         statuses.add(ARCHIVED_STATUS)
         self._statuses = statuses
 
@@ -48,7 +49,7 @@ class TaskList(Aggregate):
         return self._name
 
     @property
-    def default_status(self) -> str:
+    def default_status(self) -> str | None:
         return self._default_status
 
     @default_status.setter
