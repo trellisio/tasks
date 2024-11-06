@@ -9,6 +9,6 @@ class CreateTaskListDto(BaseModel):
 
 class CreateTaskDto(BaseModel):
     title: str
-    status: str
+    status: str | None = None
     description: str | None = None
     tags: list[str] | None = None

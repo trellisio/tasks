@@ -49,6 +49,7 @@ def add_model_mappings() -> None:
         models.Task,
         task,
         properties={
+            "_pk": task.c.id,
             "_title": task.c.title,
             "_description": task.c.description,
             "_status": task.c.status,

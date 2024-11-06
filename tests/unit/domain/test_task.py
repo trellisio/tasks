@@ -44,3 +44,23 @@ class TestTask:
     def test_error_raised_when_task_list_set(self) -> None:
         with pytest.raises(AttributeError):
             self.task.task_list = TaskList(name="todo2", statuses=set())  # type: ignore[misc]
+
+    def test_error_raised_when_status_not_set_and_no_default_status_in_list(self) -> None:
+        with pytest.raises(InvalidStatusError):
+            Task(
+                title="Finish Feature",
+                description="Random text describing the task to be completed",
+                task_list=self.task.task_list,
+                tags={"example"},
+            )
+
+    def test_default_status_used_in_list_when_status_not_passed(self) -> None:
+        self.task.task_list.default_status = "ready"
+        task = Task(
+            title="Finish Feature",
+            description="Random text describing the task to be completed",
+            task_list=self.task.task_list,
+            tags={"example"},
+        )
+
+        assert task.status == "ready"

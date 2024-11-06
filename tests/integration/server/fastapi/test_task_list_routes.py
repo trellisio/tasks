@@ -1,9 +1,7 @@
 import os
+from typing import Any
 
 import requests
-
-from app.entrypoints.server.fastapi.routes.task_list import CreateTaskListOutputDto
-from app.services.task_list.dtos import CreateTaskDto, CreateTaskListDto
 
 
 class TestTaskListRouter:
@@ -12,7 +10,7 @@ class TestTaskListRouter:
     def test_create_task_list(self) -> None:
         resp = requests.post(
             f"{self.service_url}/v1/lists",
-            CreateTaskListDto(name="TODO", statuses=set("backlog")).model_dump(),
+            json={"name": "TODO", "statuses": ["backlog"]},
             timeout=5,
         )
         assert resp.status_code == 201
@@ -20,14 +18,14 @@ class TestTaskListRouter:
     def test_create_task(self) -> None:
         resp = requests.post(
             f"{self.service_url}/v1/lists",
-            CreateTaskListDto(name="TODO", statuses=set("backlog")).model_dump(),
+            json={"name": "TODO", "statuses": ["backlog"]},
             timeout=5,
         )
-        task_list_pk: CreateTaskListOutputDto = resp.json()
+        task_list_pk: Any = resp.json()
 
         resp = requests.post(
-            f"{self.service_url}/v1/lists/{task_list_pk['pk']}",
-            CreateTaskDto(title="Something", status="backlog").model_dump(),
+            f"{self.service_url}/v1/lists/{task_list_pk.get('pk')}/tasks",
+            json={"title": "Something", "status": "backlog"},
             timeout=5,
         )
         assert resp.status_code == 201

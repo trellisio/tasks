@@ -27,7 +27,7 @@ class TaskListWriteService:
 
         return task_list.pk
 
-    async def create_task(self, *, task_list_id: int, create_task: dtos.CreateTaskDto) -> None:
+    async def create_task(self, *, task_list_id: int, create_task: dtos.CreateTaskDto) -> int:
         async with self.uow:
             task_list = await self.uow.task_list_repository.find(task_list_id)
             if not task_list:
@@ -42,3 +42,5 @@ class TaskListWriteService:
             )
             await self.uow.task_list_repository.add_tasks([task])
             await self.uow.commit()
+
+            return task.pk

@@ -32,8 +32,7 @@ class TaskList(Aggregate):
         statuses.add(ARCHIVED_STATUS)
         self._statuses = statuses
 
-        if default_status:
-            self.default_status = default_status
+        self.default_status = default_status
 
     @property
     def pk(self) -> int:
@@ -51,8 +50,8 @@ class TaskList(Aggregate):
         return self._default_status
 
     @default_status.setter
-    def default_status(self, status: str) -> None:
-        if status not in self.statuses:
+    def default_status(self, status: str | None) -> None:
+        if status is not None and status not in self.statuses:
             raise InvalidStatusError(status=status)
         self._default_status = status
 
