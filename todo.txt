@@ -1,0 +1,2 @@
+1. return ID on task creation
+2. make task status optional if default is present

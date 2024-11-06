@@ -1,13 +1,11 @@
-from __future__ import annotations
-
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from alembic import command
 from alembic.config import Config
 from kink import inject
 from pydantic import Field
 from pydantic_settings import BaseSettings
+from sqlalchemy import Connection as SqlAlchemyConnection
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from app.logger import logger
@@ -15,9 +13,6 @@ from app.logger import logger
 from ..connection import Connection
 from .encoder import dumps
 from .tables import add_model_mappings, metadata, remove_model_mappings
-
-if TYPE_CHECKING:
-    from sqlalchemy import Connection as SqlAlchemyConnection
 
 
 class SqlConnectionConfig(BaseSettings):

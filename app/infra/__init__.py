@@ -1,5 +1,4 @@
 # ruff: noqa: F403
-from __future__ import annotations
 
 from kink import di, inject
 
@@ -21,8 +20,8 @@ match config.ENVIRONMENT:
 class InfraInitializer:
     connections: list[Connection]
 
-    def __init__(self, *, connections: Connection):
-        self.connections = [connections]
+    def __init__(self, connections: list[Connection]):  # noqa: FA102
+        self.connections = connections
 
     async def init_connections(self) -> None:
         for connection in self.connections:

@@ -1,0 +1,22 @@
+meta {
+  name: task
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:8000/v1/lists/:list_id/tasks
+  body: json
+  auth: none
+}
+
+params:path {
+  list_id: 1
+}
+
+body:json {
+  {
+    "title": "Finish homework",
+    "status": "backlog"
+  }
+}

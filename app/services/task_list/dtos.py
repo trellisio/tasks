@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from pydantic import BaseModel
 
 
@@ -12,6 +10,5 @@ class CreateTaskListDto(BaseModel):
 class CreateTaskDto(BaseModel):
     title: str
     status: str
-    task_list_id: int
     description: str | None = None
     tags: list[str] | None = None

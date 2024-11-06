@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from ..aggregate import Aggregate
 from .errors import InvalidStatusError
 from .task_list import TaskList

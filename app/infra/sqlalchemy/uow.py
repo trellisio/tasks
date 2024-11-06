@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Literal, cast
 
 from kink import inject
@@ -77,7 +75,7 @@ class SqlAlchemyUow(Uow):
     _default_session_factory: async_sessionmaker[AsyncSession]
     _rr_session_factory: async_sessionmaker[AsyncSession]
 
-    def __init__(self, *, connection: SqlConnection):
+    def __init__(self, connection: SqlConnection):
         super().__init__()
         def_engine = connection.default_engine
         rr_engine = connection.repeatable_read_engine

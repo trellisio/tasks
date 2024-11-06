@@ -23,10 +23,10 @@ class TestTaskListService:
 
     async def test_create_task(self) -> None:
         pk = await self.test_create_task_list()
-        dto = CreateTaskDto(title="task 1", status="backlog", task_list_id=pk)
-        await self.service.create_task(dto)
+        dto = CreateTaskDto(title="task 1", status="backlog")
+        await self.service.create_task(task_list_id=pk, create_task=dto)
 
     async def test_error_raised_if_task_list_does_not_exist(self) -> None:
-        dto = CreateTaskDto(title="task 1", status="backlog", task_list_id=100)
+        dto = CreateTaskDto(title="task 1", status="backlog")
         with pytest.raises(NoResourceError):
-            await self.service.create_task(dto)
+            await self.service.create_task(task_list_id=100, create_task=dto)

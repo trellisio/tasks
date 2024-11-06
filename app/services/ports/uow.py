@@ -1,18 +1,14 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
+from collections.abc import Awaitable, Callable
 from functools import wraps
 from inspect import signature
-from typing import TYPE_CHECKING, Any, Literal
+from typing import Any, Literal, Self
 
 from app.domain.aggregate import Aggregate
 from app.domain.event import DomainEvent
 from app.domain.models import Task, TaskList, ports
 
 from ..reflection import Reflector
-
-if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
 
 
 class Repository[T: Aggregate](ABC):
@@ -160,7 +156,7 @@ class Uow(ABC):
     def begin(
         self,
         isolation_level: Literal["REPEATABLE READ", "READ COMMITTED"] = "READ COMMITTED",
-    ) -> Uow:
+    ) -> Self:
         self._isolation_level = isolation_level
         return self
 

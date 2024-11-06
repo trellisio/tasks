@@ -27,6 +27,7 @@ config = FastApiConfig()
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await init_connections()
+    logger.info("Connections initialized 🚀")
 
     # add routes to server
     from .routes import router  # noqa: PLC0415

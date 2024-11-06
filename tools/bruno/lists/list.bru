@@ -1,0 +1,19 @@
+meta {
+  name: list
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8000/v1/lists
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Dev",
+    "statuses": ["backlog", "ready to work", "working", "validation", "done"],
+    "default_status": "backlog"
+  }
+}

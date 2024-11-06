@@ -27,11 +27,11 @@ class TaskListWriteService:
 
         return task_list.pk
 
-    async def create_task(self, create_task: dtos.CreateTaskDto) -> None:
+    async def create_task(self, *, task_list_id: int, create_task: dtos.CreateTaskDto) -> None:
         async with self.uow:
-            task_list = await self.uow.task_list_repository.find(create_task.task_list_id)
+            task_list = await self.uow.task_list_repository.find(task_list_id)
             if not task_list:
-                raise errors.NoResourceError(msg=f"Task list {create_task.task_list_id} does not exist")
+                raise errors.NoResourceError(msg=f"Task list {task_list_id} does not exist")
 
             task = Task(
                 title=create_task.title,

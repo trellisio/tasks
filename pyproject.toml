@@ -69,7 +69,7 @@ preview = true
 select = ["ALL"]
 fixable = ["ALL"]
 extend-select = ["PLR0917"]
-ignore = ["CPY", "D", "ANN204", "TID252", "PLR0913", "TCH001", "PLR2004"]
+ignore = ["CPY", "D", "ANN204", "TID252", "PLR0913", "TCH001", "PLR2004", "FA102"]
 
 [tool.ruff.lint.pylint]
 max-positional-args = 1
