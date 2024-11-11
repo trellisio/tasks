@@ -15,5 +15,3 @@
 
 
 -- error raising and detailed logging on service methods
--- set up redis cache
--- for views, add AS to queries

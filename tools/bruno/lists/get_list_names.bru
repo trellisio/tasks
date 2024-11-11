@@ -5,7 +5,12 @@ meta {
 }
 
 get {
-  url: http://localhost:8000/api/v1/lists
+  url: http://localhost:8000/api/v1/lists?limit=10&skip=0
   body: none
   auth: none
+}
+
+params:query {
+  limit: 10
+  skip: 0
 }

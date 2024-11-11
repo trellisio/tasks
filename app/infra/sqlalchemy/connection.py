@@ -24,6 +24,14 @@ class SqlConnectionConfig(BaseSettings):
             "sqlite+aiosqlite:///:memory:",
         ],
     )
+    READ_REPLICA_DB_URL: str = Field(
+        description="URL to connect to read replica",
+        default="sqlite+aiosqlite:///:memory:",
+        examples=[
+            "postgresql+asyncpg://user:password@postgres:5432/service_name",
+            "sqlite+aiosqlite:///:memory:",
+        ],
+    )
     DB_ECHO: bool = Field(
         description="Boolean for DB to echo operations",
         default=False,
@@ -37,6 +45,7 @@ class SqlConnection(Connection):
     default_engine: AsyncEngine
 
     # READ
+    read_replica_engine: AsyncEngine
 
     async def connect(self) -> None:
         config = SqlConnectionConfig()
@@ -49,6 +58,11 @@ class SqlConnection(Connection):
         )
         self.repeatable_read_engine = self.default_engine.execution_options(
             isolation_level="REPEATABLE READ",
+        )
+        self.read_replica_engine = create_async_engine(
+            config.READ_REPLICA_DB_URL,
+            future=True,
+            echo=config.DB_ECHO,
         )
 
         await self.migrate()
@@ -71,6 +85,7 @@ class SqlConnection(Connection):
 
         await self.default_engine.dispose()
         await self.repeatable_read_engine.dispose()
+        await self.read_replica_engine.dispose()
 
     async def migrate(self) -> None:
         def run_upgrade(connection: SqlAlchemyConnection, cfg: Config) -> None:  # noqa: PLR0917

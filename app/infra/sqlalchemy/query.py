@@ -19,7 +19,7 @@ class SqlAlchemyQuery(Query):
         super().__init__(cache=cache)
 
         self.session_factory = async_sessionmaker(
-            connection.default_engine,
+            connection.read_replica_engine,
             expire_on_commit=False,
         )
 
