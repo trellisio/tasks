@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
 
+# Input DTOs
 class CreateTaskListDto(BaseModel):
     name: str
     statuses: set[str] | None = None
@@ -12,3 +13,6 @@ class CreateTaskDto(BaseModel):
     status: str | None = None
     description: str | None = None
     tags: list[str] | None = None
+
+
+# Output DTOs

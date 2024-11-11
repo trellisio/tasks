@@ -48,6 +48,7 @@ pytest-watch = "^4.2.0"
 pytest-dotenv = "^0.5.2"
 requests = "^2.32.3"
 aiosqlite = "^0.20.0"
+types-requests = "^2.32.0.20241016"
 
 [tool.poetry.group.docs]
 optional = true

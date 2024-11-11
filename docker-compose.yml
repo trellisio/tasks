@@ -26,7 +26,7 @@ services:
       - ./:/app
     environment:
       - LOG_LEVEL=ERROR
-      - SERVER_URL=http://tasks_fastapi:8000
+      - SERVER_URL=http://tasks_fastapi:8000/api
       - ENVIRONMENT=test
       - DB_URL=postgresql+asyncpg://user:password@postgres:5432/tasks
     depends_on:

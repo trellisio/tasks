@@ -9,10 +9,14 @@ from .connection import Connection
 # Initialize Infra
 match config.ENVIRONMENT:
     case "local":
+        from .memory.cache import *
         from .memory.publisher import *
+        from .sqlalchemy.query import *
         from .sqlalchemy.uow import *
     case _:
+        from .memory.cache import *
         from .nats.publisher import *
+        from .sqlalchemy.query import *
         from .sqlalchemy.uow import *
 
 
@@ -20,7 +24,7 @@ match config.ENVIRONMENT:
 class InfraInitializer:
     connections: list[Connection]
 
-    def __init__(self, connections: list[Connection]):  # noqa: FA102
+    def __init__(self, connections: list[Connection]):
         self.connections = connections
 
     async def init_connections(self) -> None:

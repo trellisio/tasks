@@ -1,0 +1,18 @@
+meta {
+  name: create_list
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8000/api/v1/lists
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Dev",
+    "statuses": ["backlog", "ready to work", "working", "validation", "done"]
+  }
+}

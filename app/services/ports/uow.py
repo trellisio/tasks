@@ -133,35 +133,7 @@ class Uow(ABC):
     def repositories(self) -> list[Repository]:
         return [self.task_list_repository]
 
-    @abstractmethod
-    async def __aenter__(self):
-        raise NotImplementedError
-
-    @abstractmethod
-    async def commit(self) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    async def rollback(self) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    async def close(self) -> None:
-        raise NotImplementedError
-
-    async def __aexit__(self, exc_type, exc, tb):  # noqa: ANN001, PLR0917
-        await self.rollback()
-        await self.close()
-
-    def begin(
-        self,
-        isolation_level: Literal["REPEATABLE READ", "READ COMMITTED"] = "READ COMMITTED",
-    ) -> Self:
-        self._isolation_level = isolation_level
-        return self
-
     # Internals
-
     def _collect_seen_aggregates(self, *, clear: bool = False) -> list[Aggregate]:
         aggs: list[Aggregate] = []
         for repo in self.repositories:
@@ -193,3 +165,31 @@ class Uow(ABC):
             await commit(*args, **kwargs)
 
         self.commit = fn  # type: ignore[assignment]
+
+    # Interface
+    @abstractmethod
+    async def __aenter__(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def commit(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def rollback(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def close(self) -> None:
+        raise NotImplementedError
+
+    async def __aexit__(self, exc_type, exc, tb):  # noqa: ANN001, PLR0917
+        await self.rollback()
+        await self.close()
+
+    def begin(
+        self,
+        isolation_level: Literal["REPEATABLE READ", "READ COMMITTED"] = "READ COMMITTED",
+    ) -> Self:
+        self._isolation_level = isolation_level
+        return self

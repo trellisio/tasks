@@ -2,8 +2,8 @@ from kink import inject
 
 from app.domain.models import Task, TaskList
 
-from .. import errors
-from ..ports import Uow
+from ... import errors
+from ...ports import Uow
 from . import dtos
 
 
