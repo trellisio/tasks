@@ -1,0 +1,21 @@
+meta {
+  name: get_task_list_tasks
+  type: http
+  seq: 9
+}
+
+get {
+  url: http://localhost:8000/api/v1/lists/:list_id/tasks?status=backlog&skip=0&limit=100
+  body: none
+  auth: none
+}
+
+params:query {
+  status: backlog
+  skip: 0
+  limit: 100
+}
+
+params:path {
+  list_id: 1
+}

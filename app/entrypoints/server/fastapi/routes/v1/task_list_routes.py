@@ -69,5 +69,20 @@ class TaskListV1Routes(Routable):
         pk = await self.write_service.create_task(task_list_id=list_id, create_task=create_task)
         return {"pk": pk}
 
+    @get("/{list_id}/tasks")
+    async def get_task_lists_tasks(
+        self,
+        *,
+        list_id: int,
+        status: str | None = None,
+        pag: Annotated[Pagination, Depends(pagination)],
+    ) -> Result:
+        return await self.read_service.view_task_list_tasks(
+            list_id=list_id,
+            status=status,
+            skip=pag["skip"],
+            limit=pag["limit"],
+        )
+
 
 task_list_v1_routes = di[TaskListV1Routes]
