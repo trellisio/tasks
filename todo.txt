@@ -1,6 +1,5 @@
-- add read replica and query port
+- add read replica
 - update services
-- get resource and resources with pagination
 - prom metrics
 - distributed tracing
 - AWS lambda entrypoints
@@ -17,3 +16,4 @@
 
 -- error raising and detailed logging on service methods
 -- set up redis cache
+-- for views, add AS to queries

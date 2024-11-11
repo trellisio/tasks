@@ -12,7 +12,7 @@ from app.logger import logger
 
 from ..connection import Connection
 from .encoder import dumps
-from .tables import add_model_mappings, metadata, remove_model_mappings
+from .tables import add_model_mappings, remove_model_mappings
 
 
 class SqlConnectionConfig(BaseSettings):
@@ -56,12 +56,18 @@ class SqlConnection(Connection):
         logger.info("Database connected 🚨")
 
     async def close(self, *, cleanup: bool = False) -> None:
+        remove_model_mappings()
         if cleanup:
-            remove_model_mappings()
+
+            def run_downgrade(connection: SqlAlchemyConnection, cfg: Config) -> None:  # noqa: PLR0917
+                cfg.attributes["connection"] = connection
+                command.downgrade(cfg, "base")
+
             async with self.default_engine.begin() as conn:
-                remove_model_mappings()
-                for table in metadata.sorted_tables:
-                    await conn.execute(table.delete())
+                await conn.run_sync(
+                    run_downgrade,
+                    Config(Path("app") / "infra" / "sqlalchemy" / "alembic.ini"),
+                )
 
         await self.default_engine.dispose()
         await self.repeatable_read_engine.dispose()

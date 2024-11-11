@@ -1,10 +1,13 @@
-from typing import TypedDict
+from typing import Annotated, TypedDict
 
 from classy_fastapi import Routable, get, post
+from fastapi import Depends
 from kink import di, inject
 
 from app.services.ports.query import Result
 from app.services.task_list import v1
+
+from ...dependencies import Pagination, pagination
 
 
 class CreatedResourceDto(TypedDict):
@@ -22,8 +25,8 @@ class TaskListV1Routes(Routable):
         self.read_service = read_service
 
     @get("/")
-    async def get_task_list_names(self) -> Result:
-        return await self.read_service.view_task_list_names()
+    async def get_task_list_names(self, pag: Annotated[Pagination, Depends(pagination)]) -> Result:
+        return await self.read_service.view_task_list_names(skip=pag["skip"], limit=pag["limit"])
 
     @post("/", status_code=201)
     async def create_task_list(self, create_task_list: v1.dtos.CreateTaskListDto) -> CreatedResourceDto:

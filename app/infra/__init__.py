@@ -14,8 +14,8 @@ match config.ENVIRONMENT:
         from .sqlalchemy.query import *
         from .sqlalchemy.uow import *
     case _:
-        from .memory.cache import *
         from .nats.publisher import *
+        from .redis.cache import *
         from .sqlalchemy.query import *
         from .sqlalchemy.uow import *
 

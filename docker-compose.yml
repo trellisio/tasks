@@ -16,6 +16,7 @@ services:
     depends_on:
       - nats
       - postgres
+      - redis
 
   integration_tests:
     build:
@@ -32,6 +33,7 @@ services:
     depends_on:
       - tasks_fastapi
 
+  # DB
   postgres:
     image: postgres:latest
     restart: always
@@ -42,6 +44,21 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=user
 
+  # Cache
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - 6379:6379
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    restart: always
+    ports:
+      - 6380:8081
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+
+  # Broker
   nats:
     image: nats:alpine
     restart: always

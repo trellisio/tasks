@@ -71,6 +71,7 @@ RUN --mount=type=cache,target=/root/.cache \
 # Testing
 ##################
 FROM test_builder as test
+COPY --from=fastapi_builder $PYSETUP_PATH $PYSETUP_PATH
 WORKDIR /app
 EXPOSE 8000
 CMD make int
