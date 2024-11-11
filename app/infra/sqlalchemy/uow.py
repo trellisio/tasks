@@ -1,7 +1,7 @@
 from typing import Literal, cast
 
 from kink import inject
-from sqlalchemy import update
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.future import select
 
@@ -26,13 +26,15 @@ class SqlAlchemyTaskDao(ports.TaskDao):
         status: str,
         migration_status: str,
     ) -> None:
-        stmt = (
-            update(Task)
-            .where(Task._task_list._pk == task_list_pk)  # type: ignore[arg-type] # noqa: SLF001
-            .where(Task._status == status)  # type: ignore[arg-type] # noqa: SLF001
-            .values(status=migration_status)
+        query = """
+            UPDATE task
+            SET status = :migration_status
+            WHERE task_list_id = :list_id AND status = :status
+        """
+        await self.session.execute(
+            text(query),
+            {"migration_status": migration_status, "list_id": task_list_pk, "status": status},
         )
-        await self.session.execute(stmt)
 
 
 # Repositories

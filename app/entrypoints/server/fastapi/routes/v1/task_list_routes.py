@@ -1,6 +1,6 @@
 from typing import Annotated, TypedDict
 
-from classy_fastapi import Routable, get, post
+from classy_fastapi import Routable, delete, get, post, put
 from fastapi import Depends
 from kink import di, inject
 
@@ -32,6 +32,33 @@ class TaskListV1Routes(Routable):
     async def create_task_list(self, create_task_list: v1.dtos.CreateTaskListDto) -> CreatedResourceDto:
         pk = await self.write_service.create_task_list(create_task_list)
         return {"pk": pk}
+
+    @put("/{list_id}")
+    async def update_task_list(
+        self,
+        *,
+        list_id: int,
+        update_task_list: v1.dtos.UpdateTaskListDto,
+    ) -> v1.dtos.TaskListOutputDto:
+        return await self.write_service.update_task_list(task_list_id=list_id, update_task_list=update_task_list)
+
+    @put("/{list_id}/statuses")
+    async def update_task_list_statuses(
+        self,
+        *,
+        list_id: int,
+        add_status: v1.dtos.AddTaskListStatusDto,
+    ) -> v1.dtos.TaskListOutputDto:
+        return await self.write_service.add_task_list_status(task_list_id=list_id, status=add_status)
+
+    @delete("/{list_id}/statuses")
+    async def delete_task_list_status(
+        self,
+        *,
+        list_id: int,
+        status: v1.dtos.RemoveTaskListStatusDto,
+    ) -> v1.dtos.TaskListOutputDto:
+        return await self.write_service.remove_task_list_status(task_list_id=list_id, status=status)
 
     @get("/{list_id}")
     async def get_task_list(self, list_id: int) -> Result:

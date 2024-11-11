@@ -45,6 +45,10 @@ class TaskList(Aggregate):
     def name(self) -> str:
         return self._name
 
+    @name.setter
+    def name(self, name: str) -> None:
+        self._name = name
+
     @property
     def default_status(self) -> str | None:
         return self._default_status
@@ -57,10 +61,16 @@ class TaskList(Aggregate):
 
     @property
     def statuses(self) -> set[str]:
+        # Bad solution to quickly deal with DB
+        if isinstance(self._statuses, list):
+            self._statuses = set(self._statuses)
+
         return self._statuses
 
     def add_status(self, status: str) -> None:
-        self._statuses.add(status)
+        if not status:
+            raise InvalidStatusError(status=status)
+        self.statuses.add(status)
 
     async def remove_status(
         self,
@@ -72,10 +82,10 @@ class TaskList(Aggregate):
         if status == ARCHIVED_STATUS:
             raise ArchivedStatusError  # cannot remove this status
 
-        if status not in self._statuses:
+        if status not in self.statuses:
             return
 
-        if migration_status and migration_status not in self._statuses:
+        if migration_status and migration_status not in self.statuses:
             raise InvalidStatusError(status=migration_status)
 
         # Note we are passing in a repo rather than eager load for scalability concerns
@@ -85,4 +95,4 @@ class TaskList(Aggregate):
             migration_status=migration_status or ARCHIVED_STATUS,
         )
 
-        self._statuses.remove(status)
+        self.statuses.remove(status)

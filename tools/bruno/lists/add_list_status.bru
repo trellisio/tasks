@@ -1,0 +1,21 @@
+meta {
+  name: add_list_status
+  type: http
+  seq: 6
+}
+
+put {
+  url: http://localhost:8000/api/v1/lists/:list_id/statuses
+  body: json
+  auth: none
+}
+
+params:path {
+  list_id: 1
+}
+
+body:json {
+  {
+    "status": "discovery"
+  }
+}

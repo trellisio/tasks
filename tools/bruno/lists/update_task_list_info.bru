@@ -1,0 +1,21 @@
+meta {
+  name: update_task_list_info
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:8000/api/v1/lists/:list_id
+  body: json
+  auth: none
+}
+
+params:path {
+  list_id: 1
+}
+
+body:json {
+  {
+    "default_status": "backlog"
+  }
+}

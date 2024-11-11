@@ -1,4 +1,3 @@
-- add read replica
 - update services
 - prom metrics
 - distributed tracing
@@ -15,3 +14,4 @@
 
 
 -- error raising and detailed logging on service methods
+-- add input validation on service input DTOs

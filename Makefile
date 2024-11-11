@@ -35,7 +35,7 @@ down:
 	docker compose -f ./docker-compose.yml down --remove-orphans
 
 integration: down up
-	docker compose -f ./docker-compose.yml up --exit-code-from integration_tests integration_tests
+	docker compose -f ./docker-compose.yml up --profile test --exit-code-from integration_tests integration_tests
 
 # Testing
 unit:

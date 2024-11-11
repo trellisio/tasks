@@ -34,6 +34,8 @@ services:
       - READ_REPLICA_DB_URL=postgresql+asyncpg://user:password@postgres:5432/tasks
     depends_on:
       - tasks_fastapi
+    profiles:
+      - test
 
   # DB
   postgres:
