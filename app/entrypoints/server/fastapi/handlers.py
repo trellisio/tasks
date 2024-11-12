@@ -25,7 +25,7 @@ def service_validation_error_handler(_: Request, exception: ValidationError) -> 
 
 def service_no_resource_error_handler(_: Request, exception: NoResourceError) -> JSONResponse:
     return JSONResponse(
-        status_code=401,
+        status_code=404,
         content=jsonable_encoder(exception.serialize()),
     )
 

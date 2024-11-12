@@ -1,4 +1,3 @@
-- update services
 - prom metrics
 - distributed tracing
 - AWS lambda entrypoints
@@ -9,13 +8,10 @@
 
 - auth and middleware to protect routes
 - set up private library for events
-- publish service events
+- publish service events -- outbox pattern?
 - nats entry points? jetstream listeners? stream configs?
 
 
--- error raising and detailed logging on service methods
--- add input validation on service input DTOs
 -- created_at updated_at columns
 -- Tags on task list
 -- Scheduled Tasks
--- no resource error throwing 401

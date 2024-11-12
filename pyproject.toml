@@ -19,6 +19,7 @@ asyncpg = "^0.29.0"
 alembic = "^1.13.1"
 nats-py = "^2.9.0"
 redis = {extras = ["hiredis"], version = "^5.2.0"}
+prometheus-client = "^0.21.0"
 
 [tool.poetry.group.entrypoint_fastapi]
 optional = true

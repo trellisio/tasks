@@ -1,6 +1,7 @@
 from kink import inject
 
 from app.domain.models import Task, TaskList
+from app.logger import logger
 
 from ... import errors
 from ...ports import Uow
@@ -75,6 +76,7 @@ class TaskListWriteService:
         async with self.uow:
             task_list = await self._get_task_list(task_list_id)
             await task_list.remove_status(status=status.status, dao=self.uow.task_dao)
+            logger.info(f"Removed status {status.status} from task list {task_list_id}. Tasks updated.")
 
             await self.uow.commit()
 
@@ -89,6 +91,7 @@ class TaskListWriteService:
         async with self.uow:
             task_list = await self.uow.task_list_repository.find(task_list_id)
             if not task_list:
+                logger.error(f"Task list {task_list_id} does not exist")
                 raise errors.NoResourceError(msg=f"Task list {task_list_id} does not exist")
 
             task = Task(
@@ -107,6 +110,7 @@ class TaskListWriteService:
         async with self.uow:
             task = await self.uow.task_dao.get_task(task_id)
             if not task:
+                logger.error(f"Task {task_id} does not exist")
                 raise errors.NoResourceError(msg=f"Task {task_id} does not exist")
 
             task.title = update_task.title or task.title
@@ -130,8 +134,10 @@ class TaskListWriteService:
     async def _get_task_list(self, task_list_id: int) -> TaskList:
         task_lists = await self.uow.task_list_repository.find(task_list_id)
         if not task_lists:
+            logger.error(f"Task list {task_list_id} does not exist")
             raise errors.NoResourceError(msg=f"Task list {task_list_id} does not exist")
         if len(task_lists) > 1:
+            logger.error(f"Found multiple task lists with id {task_list_id}")
             raise errors.ServiceError(msg=f"Found multiple task lists with id {task_list_id}")
 
         return task_lists[0]

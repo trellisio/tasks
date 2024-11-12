@@ -70,3 +70,14 @@ services:
       - 4222:4222
     command:
       - '--jetstream'
+
+  # Observability
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    ports:
+      - 9090:9090
+    volumes:
+      - ./.configs/prometheus:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'

@@ -10,11 +10,13 @@ from .connection import Connection
 match config.ENVIRONMENT:
     case "local":
         from .memory.cache import *
+        from .memory.metrics import *
         from .memory.publisher import *
         from .sqlalchemy.query import *
         from .sqlalchemy.uow import *
     case _:
         from .nats.publisher import *
+        from .prometheus.metrics import *
         from .redis.cache import *
         from .sqlalchemy.query import *
         from .sqlalchemy.uow import *

@@ -1,54 +1,58 @@
-from pydantic import BaseModel
+from typing import Annotated
+
+from pydantic import BaseModel, Field
+
+LabelField = Annotated[str, Field(min_length=1, max_length=100)]
+StatusFieldRequired = Annotated[str, Field(min_length=1, max_length=50)]
+StatusFieldOptional = Annotated[str | None, Field(min_length=1, max_length=50)]
 
 
 # Input DTOs
 class CreateTaskListDto(BaseModel):
-    name: str
+    name: LabelField
     statuses: set[str] | None = None
-    default_status: str | None = None
+    default_status: StatusFieldOptional = None
 
 
 class UpdateTaskListDto(BaseModel):
-    name: str | None = None
-    default_status: str | None = None
+    name: LabelField
+    default_status: StatusFieldOptional = None
 
 
 class AddTaskListStatusDto(BaseModel):
-    status: str
+    status: StatusFieldRequired
 
 
 class RemoveTaskListStatusDto(BaseModel):
-    status: str
-    migration_status: str | None = None
+    status: StatusFieldRequired
+    migration_status: StatusFieldOptional = None
 
 
 class CreateTaskDto(BaseModel):
-    title: str
-    status: str | None = None
-    description: str | None = None
+    title: Annotated[str, Field(min_length=1)]
+    status: StatusFieldOptional = None
+    description: Annotated[str | None, Field(min_length=1)] = None
     tags: list[str] | None = None
 
 
 class UpdateTaskDto(BaseModel):
-    title: str | None = None
-    status: str | None = None
-    description: str | None = None
+    title: Annotated[str | None, Field(min_length=1)] = None
+    status: StatusFieldOptional = None
+    description: Annotated[str | None, Field(min_length=1)] = None
     tags: list[str] | None = None
 
 
 # Output DTOs
-
-
 class TaskListOutputDto(BaseModel):
     pk: int
     name: str
     statuses: set[str]
-    default_status: str | None
+    default_status: str | None = None
 
 
 class TaskOutputDto(BaseModel):
     pk: int
     title: str
     status: str
-    description: str | None
-    tags: set[str] | None
+    description: str | None = None
+    tags: set[str] | None = None
