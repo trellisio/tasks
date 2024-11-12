@@ -41,6 +41,10 @@ class Task(Aggregate):
     def title(self) -> str:
         return self._title
 
+    @title.setter
+    def title(self, new_title: str) -> None:
+        self._title = new_title
+
     @property
     def pk(self) -> int:
         if self._pk is None:
@@ -51,6 +55,10 @@ class Task(Aggregate):
     @property
     def description(self) -> str | None:
         return self._description
+
+    @description.setter
+    def description(self, new_description: str) -> None:
+        self._description = new_description
 
     @property
     def status(self) -> str:
@@ -69,6 +77,9 @@ class Task(Aggregate):
 
     @property
     def tags(self) -> set[str]:
+        if isinstance(self._tags, list):
+            self._tags = set(self._tags)
+
         return self._tags
 
     def add_tag(self, tag: str) -> None:

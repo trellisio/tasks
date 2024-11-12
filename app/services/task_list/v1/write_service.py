@@ -103,6 +103,29 @@ class TaskListWriteService:
 
             return task.pk
 
+    async def update_task(self, *, task_id: int, update_task: dtos.UpdateTaskDto) -> dtos.TaskOutputDto:
+        async with self.uow:
+            task = await self.uow.task_dao.get_task(task_id)
+            if not task:
+                raise errors.NoResourceError(msg=f"Task {task_id} does not exist")
+
+            task.title = update_task.title or task.title
+            task.status = update_task.status or task.status
+            task.description = update_task.description or task.description
+            if update_task.tags:
+                for tag in update_task.tags:
+                    task.add_tag(tag)
+
+            await self.uow.commit()
+
+            return dtos.TaskOutputDto(
+                pk=task.pk,
+                title=task.title,
+                status=task.status,
+                description=task.description,
+                tags=task.tags,
+            )
+
     # Utils
     async def _get_task_list(self, task_list_id: int) -> TaskList:
         task_lists = await self.uow.task_list_repository.find(task_list_id)

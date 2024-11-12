@@ -115,12 +115,18 @@ class TaskListRepository(Repository[TaskList], ABC):
         raise NotImplementedError
 
 
+class TaskDao(ports.TaskDao, ABC):
+    @abstractmethod
+    async def get_task(self, pk: int) -> Task:
+        raise NotImplementedError
+
+
 class Uow(ABC):
     # repositories
     task_list_repository: TaskListRepository
 
     # domain DAOs
-    task_dao: ports.TaskDao
+    task_dao: TaskDao
 
     # Internals
     _isolation_level: Literal["REPEATABLE READ", "READ COMMITTED"]

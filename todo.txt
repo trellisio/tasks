@@ -15,5 +15,7 @@
 
 -- error raising and detailed logging on service methods
 -- add input validation on service input DTOs
--- indexes
 -- created_at updated_at columns
+-- Tags on task list
+-- Scheduled Tasks
+-- no resource error throwing 401

@@ -84,5 +84,15 @@ class TaskListV1Routes(Routable):
             limit=pag["limit"],
         )
 
+    @put("/{list_id}/tasks/{task_id}")
+    async def update_task(
+        self,
+        *,
+        list_id: int,  # noqa: ARG002
+        task_id: int,
+        update_task: v1.dtos.UpdateTaskDto,
+    ) -> v1.dtos.TaskOutputDto:
+        return await self.write_service.update_task(task_id=task_id, update_task=update_task)
+
 
 task_list_v1_routes = di[TaskListV1Routes]

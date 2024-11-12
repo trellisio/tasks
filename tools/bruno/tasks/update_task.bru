@@ -1,0 +1,23 @@
+meta {
+  name: update_task
+  type: http
+  seq: 3
+}
+
+put {
+  url: http://localhost:8000/api/v1/lists/:list_id/tasks/:task_id
+  body: json
+  auth: none
+}
+
+params:path {
+  list_id: 1
+  task_id: 1
+}
+
+body:json {
+  {
+    "status": "ready to work",
+    "description": "AC"
+  }
+}

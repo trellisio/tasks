@@ -5,19 +5,25 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.future import select
 
-from app.domain.models import Task, TaskList, ports
-from app.services.ports.uow import TaskListRepository, Uow
+from app.domain.models import Task, TaskList
+from app.services.ports.uow import TaskDao, TaskListRepository, Uow
 
 from .connection import SqlConnection
 
 
 # DAOs
-class SqlAlchemyTaskDao(ports.TaskDao):
+class SqlAlchemyTaskDao(TaskDao):
     session: AsyncSession
 
     def __init__(self, session: AsyncSession):
         super().__init__()
         self.session = session
+
+    async def get_task(self, pk: int) -> Task:
+        stmt = select(Task).where(Task._pk == pk)  # type: ignore[arg-type]  # noqa: SLF001
+        res = await self.session.execute(stmt)
+        task = res.scalars().all()[0]
+        return cast(Task, task)
 
     async def update_all_tasks_with_status(
         self,
