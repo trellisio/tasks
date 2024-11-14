@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+import uvicorn
 from fastapi import FastAPI
 from pydantic import Field
 from pydantic_settings import BaseSettings
@@ -44,3 +45,13 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(lifespan=lifespan)
 register_handlers(app)
 register_middlewares(app)
+
+
+def listen() -> None:
+    uvicorn.run(
+        "app.entrypoints.server.fastapi:app",
+        host="0.0.0.0",  # noqa: S104
+        port=config.PORT,
+        reload=config.FASTAPI_ENV == "development",
+        proxy_headers=True,
+    )

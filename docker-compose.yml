@@ -11,14 +11,23 @@ services:
       - ./:/app
     environment:
       - ENVIRONMENT=test
+      # DB
       - DB_URL=postgresql+asyncpg://user:password@postgres:5432/tasks
       - READ_REPLICA_DB_URL=postgresql+asyncpg://user:password@postgres:5432/tasks
+      # Tracing
+      - OTEL_SERVICE_NAME=tasks
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_TRACES_EXPORTER=otlp
     restart: always
     depends_on:
       - nats
       - postgres
       - redis
+      - prometheus
+      - otel-collector
 
+  # Testing
   integration_tests:
     build:
       context: .
@@ -81,3 +90,19 @@ services:
       - ./.configs/prometheus:/etc/prometheus/
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    restart: always
+    ports:
+      - 16686:16686
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    restart: always
+    volumes:
+      - ./.configs/opentelemetry-collector:/etc/otel
+    ports:
+      - 4317:4317
+    command:
+      - '--config=/etc/otel/collector.yaml'
+    depends_on:
+      - jaeger

@@ -1,5 +1,3 @@
-- prom metrics
-- distributed tracing
 - AWS lambda entrypoints
 - GRP entrypoint
 - GraphQL entrypoint
@@ -11,7 +9,5 @@
 - publish service events -- outbox pattern?
 - nats entry points? jetstream listeners? stream configs?
 
-
--- created_at updated_at columns
 -- Tags on task list
 -- Scheduled Tasks

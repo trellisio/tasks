@@ -2,20 +2,19 @@ from typing import Annotated
 
 from pydantic import BaseModel, Field
 
-LabelField = Annotated[str, Field(min_length=1, max_length=100)]
 StatusFieldRequired = Annotated[str, Field(min_length=1, max_length=50)]
 StatusFieldOptional = Annotated[str | None, Field(min_length=1, max_length=50)]
 
 
 # Input DTOs
 class CreateTaskListDto(BaseModel):
-    name: LabelField
+    name: Annotated[str, Field(min_length=1, max_length=100)]
     statuses: set[str] | None = None
     default_status: StatusFieldOptional = None
 
 
 class UpdateTaskListDto(BaseModel):
-    name: LabelField
+    name: Annotated[str | None, Field(min_length=1, max_length=100)] = None
     default_status: StatusFieldOptional = None
 
 

@@ -1,9 +1,10 @@
-from sqlalchemy import JSON, Column, ForeignKey, Integer, MetaData, String, Table, Text
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, MetaData, String, Table, Text, func
 from sqlalchemy.orm import registry, relationship
 
 from app.domain import models
 
 metadata = MetaData()
+
 
 # tables
 task_list = Table(
@@ -11,6 +12,8 @@ task_list = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("version", Integer, nullable=False, default=0),
+    Column("created_at", DateTime, server_default=func.now()),
+    Column("updated_at", DateTime, onupdate=func.now()),
     Column("name", String(255), nullable=False, index=True),
     Column("statuses", JSON, nullable=True),
     Column("default_status", String(255), nullable=True),
@@ -21,6 +24,8 @@ task = Table(
     metadata,
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("version", Integer, nullable=False, default=0),
+    Column("created_at", DateTime, server_default=func.now()),
+    Column("updated_at", DateTime, onupdate=func.now()),
     Column("title", String(255), nullable=False),
     Column("description", Text, nullable=True),
     Column("status", String(255), nullable=False, index=True),

@@ -83,7 +83,7 @@ ENV FASTAPI_ENV=development
 COPY --from=fastapi_builder $PYSETUP_PATH $PYSETUP_PATH
 WORKDIR /app
 EXPOSE 8000
-CMD uvicorn app.entrypoints.server.fastapi:app --port 8000 --proxy-headers --host 0.0.0.0 --reload
+CMD opentelemetry-instrument python main.py fastapi
 ###################
 # NATS
 ##################
@@ -101,7 +101,7 @@ COPY --from=fastapi_builder $PYSETUP_PATH $PYSETUP_PATH
 WORKDIR /app
 EXPOSE 8000
 COPY ./app /app/
-CMD uvicorn app.entrypoints.server.fastapi:app --port 8000 --proxy-headers --host 0.0.0.0
+CMD opentelemetry-instrument python main.py fastapi
 ###################
 # NATS
 ##################

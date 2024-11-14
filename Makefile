@@ -1,12 +1,23 @@
 PYFILES=app tests
 
+# Git Hooks
+pre-commit: check scan unit # execute in .git/hooks
+
 # Dependencies
 shell:
 	poetry shell
 
-install:
+install: install-tracing-instrumentation
 	poetry install --with entrypoint_fastapi,dev,test,docs
 
+install-tracing-instrumentation:
+	opentelemetry-bootstrap -a install
+
+# Database
+autogenerate:
+	export DB_URL=postgresql+asyncpg://user:password@localhost:5432/tasks && \
+	alembic -c app/infra/sqlalchemy/alembic.ini revision --autogenerate
+	
 # Formatting
 lint:
 	ruff check --fix $(PYFILES)
@@ -32,21 +43,15 @@ up:
 	docker compose -f ./docker-compose.yml up -d --force-recreate
 
 down:
-	docker compose -f ./docker-compose.yml down --remove-orphans
+	docker compose -f ./docker-compose.yml --profile test down --remove-orphans
 
-integration: down up
-	docker compose -f ./docker-compose.yml up --profile test --exit-code-from integration_tests integration_tests
+integration: down
+	docker compose -f ./docker-compose.yml build
+	docker compose -f ./docker-compose.yml --profile test up --force-recreate --exit-code-from integration_tests integration_tests
 
 # Testing
 unit:
 	pytest -vv --capture=tee-sys --asyncio-mode=auto tests/unit/
 
 int:
-	./wait-for.sh http://tasks_fastapi:8000/healthz pytest -vv tests/integration --capture=tee-sys --asyncio-mode=auto
-
-# Git Hooks
-pre-commit: check scan unit # execute in .git/hooks
-
-# Database
-autogenerate:
-	alembic -c app/infra/sqlalchemy/alembic.ini revision --autogenerate
+	./wait-for.sh http://tasks_fastapi:8000/api/healthz pytest -vv tests/integration --capture=tee-sys --asyncio-mode=auto

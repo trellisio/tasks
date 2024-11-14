@@ -12,7 +12,12 @@ scrape_configs:
     # scheme defaults to 'http'.
     static_configs:
       - targets: ['prometheus:9090']
+  - job_name: 'otel-collector'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['otel-collector:8889']
+      - targets: ['otel-collector:8888']
   - job_name: 'tasks'
     static_configs:
       - targets: ['tasks_fastapi:8000']
-    metrics_path: '/metrics' # Specify your custom metrics endpoint here
+    metrics_path: '/api/metrics' # Specify your custom metrics endpoint here
