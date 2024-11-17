@@ -1,6 +1,5 @@
 - AWS lambda entrypoints
 - GRP entrypoint
-- GraphQL entrypoint
 - NATS entrypoint
 
 
@@ -9,5 +8,9 @@
 - publish service events -- outbox pattern?
 - nats entry points? jetstream listeners? stream configs?
 
+-- Set up keycloak
+-- Integration tests on entrypoint
 -- Tags on task list
 -- Scheduled Tasks
+-- concept of a user
+-- indexes with user

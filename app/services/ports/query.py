@@ -2,13 +2,11 @@ import json
 from abc import ABC, abstractmethod
 from functools import wraps
 from inspect import signature
-from typing import Any, ClassVar, Literal, Mapping
+from typing import Any, ClassVar, Literal, Mapping, Type
 
 from app.config import config
 
 from .cache import Cache
-
-Result = list[dict[str, Any]]
 
 
 class Query(ABC):
@@ -61,5 +59,11 @@ class Query(ABC):
 
     # Interface
     @abstractmethod
-    async def execute[T](self, *, query: str, params: Mapping[str, Any] | None = None) -> Result:
+    async def execute[T](
+        self,
+        *,
+        query: str,
+        params: Mapping[str, Any] | None = None,
+        serializer: Type[T],  # noqa: FA100
+    ) -> list[T]:
         raise NotImplementedError

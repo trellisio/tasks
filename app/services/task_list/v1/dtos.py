@@ -9,7 +9,7 @@ StatusFieldOptional = Annotated[str | None, Field(min_length=1, max_length=50)]
 # Input DTOs
 class CreateTaskListDto(BaseModel):
     name: Annotated[str, Field(min_length=1, max_length=100)]
-    statuses: set[str] | None = None
+    statuses: list[str] | None = None
     default_status: StatusFieldOptional = None
 
 

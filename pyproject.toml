@@ -29,6 +29,13 @@ fastapi = "^0.111.0"
 uvicorn = "^0.30.0"
 classy-fastapi = "^0.6.1"
 
+[tool.poetry.group.entrypoint_graphql]
+optional = true
+
+[tool.poetry.group.entrypoint_graphql.dependencies]
+strawberry-graphql = {extras = ["fastapi"], version = "^0.248.1"}
+uvicorn = "^0.30.0"
+fastapi = "^0.111.0"
 
 [tool.poetry.group.dev]
 optional = true
@@ -63,24 +70,6 @@ graphviz = "^0.20.3"
 
 [tool.poetry.group.tracing.dependencies]
 opentelemetry-distro = "^0.49b1"
-opentelemetry-instrumentation-asyncio = "^0.49b1"
-opentelemetry-instrumentation-dbapi = "^0.49b1"
-opentelemetry-instrumentation-logging = "^0.49b1"
-opentelemetry-instrumentation-sqlite3 = "^0.49b1"
-opentelemetry-instrumentation-threading = "^0.49b1"
-opentelemetry-instrumentation-urllib = "^0.49b1"
-opentelemetry-instrumentation-wsgi = "^0.49b1"
-opentelemetry-instrumentation-asyncpg = "^0.49b1"
-opentelemetry-instrumentation-fastapi = "^0.49b1"
-opentelemetry-instrumentation-httpx = "^0.49b1"
-opentelemetry-instrumentation-jinja2 = "^0.49b1"
-opentelemetry-instrumentation-redis = "^0.49b1"
-opentelemetry-instrumentation-requests = "^0.49b1"
-opentelemetry-instrumentation-sqlalchemy = "^0.49b1"
-opentelemetry-instrumentation-starlette = "^0.49b1"
-opentelemetry-instrumentation-system-metrics = "^0.49b1"
-opentelemetry-instrumentation-tortoiseorm = "^0.49b1"
-opentelemetry-instrumentation-urllib3 = "^0.49b1"
 opentelemetry-exporter-otlp = "^1.28.1"
 
 [build-system]
@@ -108,3 +97,6 @@ max-positional-args = 1
 [tool.ruff.format]
 preview = true
 quote-style = "double"
+
+[tool.mypy]
+plugins = ["strawberry.ext.mypy_plugin"]

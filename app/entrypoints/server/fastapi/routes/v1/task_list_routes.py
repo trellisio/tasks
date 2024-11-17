@@ -4,7 +4,6 @@ from classy_fastapi import Routable, delete, get, post, put
 from fastapi import Depends
 from kink import di, inject
 
-from app.services.ports.query import Result
 from app.services.task_list import v1
 
 from ...dependencies import Pagination, pagination
@@ -25,8 +24,11 @@ class TaskListV1Routes(Routable):
         self.read_service = read_service
 
     @get("/")
-    async def get_task_list_names(self, pag: Annotated[Pagination, Depends(pagination)]) -> Result:
-        return await self.read_service.view_task_list_names(skip=pag["skip"], limit=pag["limit"])
+    async def get_task_list_names(
+        self,
+        pag: Annotated[Pagination, Depends(pagination)],
+    ) -> list[dict]:
+        return await self.read_service.view_task_list_names(skip=pag["skip"], limit=pag["limit"], serializer=dict)
 
     @post("/", status_code=201)
     async def create_task_list(self, create_task_list: v1.dtos.CreateTaskListDto) -> CreatedResourceDto:
@@ -61,8 +63,8 @@ class TaskListV1Routes(Routable):
         return await self.write_service.remove_task_list_status(task_list_id=list_id, status=status)
 
     @get("/{list_id}")
-    async def get_task_list(self, list_id: int) -> Result:
-        return await self.read_service.view_task_list(list_id)
+    async def get_task_list(self, list_id: int) -> dict:
+        return await self.read_service.view_task_list(list_id=list_id, serializer=dict)
 
     @post("/{list_id}/tasks", status_code=201)
     async def create_task(self, *, list_id: int, create_task: v1.dtos.CreateTaskDto) -> CreatedResourceDto:
@@ -76,12 +78,13 @@ class TaskListV1Routes(Routable):
         list_id: int,
         status: str | None = None,
         pag: Annotated[Pagination, Depends(pagination)],
-    ) -> Result:
+    ) -> list[dict]:
         return await self.read_service.view_task_list_tasks(
             list_id=list_id,
             status=status,
             skip=pag["skip"],
             limit=pag["limit"],
+            serializer=dict,
         )
 
     @put("/{list_id}/tasks/{task_id}")

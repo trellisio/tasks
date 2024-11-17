@@ -1,11 +1,10 @@
-from typing import Any, Mapping
+from typing import Any, Mapping, Type, cast
 
 from kink import inject
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.services.ports import Cache, Query
-from app.services.ports.query import Result
 
 from .connection import SqlConnection
 
@@ -23,18 +22,26 @@ class SqlAlchemyQuery(Query):
             expire_on_commit=False,
         )
 
-    async def execute(self, *, query: str, params: Mapping[str, Any] | None = None) -> Result:
+    async def execute[T](
+        self,
+        *,
+        query: str,
+        params: Mapping[str, Any] | None = None,
+        serializer: Type[T],  # noqa: FA100
+    ) -> list[T]:
         async with self.session_factory() as session:
             res = await session.execute(
                 text(query),
                 params,
             )
 
-            rows = []
+            rows: list[T] = []
             for row in res.all():
-                payload = {}
-                for i, key in enumerate(res.keys()):
-                    payload[key] = row[i]
-                rows.append(payload)
+                payload = dict(zip(res.keys(), row))
+                if serializer is dict:
+                    # if serializer is dict, just ignore
+                    rows.append(cast(T, payload))
+                else:
+                    rows.append(serializer(**payload))
 
             return rows

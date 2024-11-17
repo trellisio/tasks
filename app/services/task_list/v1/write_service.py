@@ -18,7 +18,7 @@ class TaskListWriteService:
     async def create_task_list(self, create_task_list: dtos.CreateTaskListDto) -> int:
         task_list = TaskList(
             name=create_task_list.name,
-            statuses=create_task_list.statuses,
+            statuses=list(create_task_list.statuses) if create_task_list.statuses else None,
             default_status=create_task_list.default_status,
         )
 

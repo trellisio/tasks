@@ -27,6 +27,33 @@ services:
       - prometheus
       - otel-collector
 
+  tasks_graphql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: graphql_dev
+    ports:
+      - 8001:8000
+    volumes:
+      - ./:/app
+    environment:
+      - ENVIRONMENT=test
+      # DB
+      - DB_URL=postgresql+asyncpg://user:password@postgres:5432/tasks
+      - READ_REPLICA_DB_URL=postgresql+asyncpg://user:password@postgres:5432/tasks
+      # Tracing
+      - OTEL_SERVICE_NAME=tasks
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_TRACES_EXPORTER=otlp
+    restart: always
+    depends_on:
+      - nats
+      - postgres
+      - redis
+      - prometheus
+      - otel-collector
+
   # Testing
   integration_tests:
     build:

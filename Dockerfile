@@ -61,8 +61,13 @@ WORKDIR $PYSETUP_PATH
 RUN --mount=type=cache,target=/root/.cache \
     poetry install --with entrypoint_fastapi
 ###################
-# NATS
+# GraphQL
 ##################
+FROM builder as graphql_builder
+WORKDIR $PYSETUP_PATH
+# Install dev dependencies
+RUN --mount=type=cache,target=/root/.cache \
+    poetry install --with entrypoint_graphql
 
 #################################################
 # Development
@@ -83,10 +88,15 @@ ENV FASTAPI_ENV=development
 COPY --from=fastapi_builder $PYSETUP_PATH $PYSETUP_PATH
 WORKDIR /app
 EXPOSE 8000
-CMD opentelemetry-instrument python main.py fastapi
+CMD python -m app fastapi
 ###################
-# NATS
+# GraphQL
 ##################
+FROM base as graphql_dev
+COPY --from=graphql_builder $PYSETUP_PATH $PYSETUP_PATH
+WORKDIR /app
+EXPOSE 8000
+CMD python -m app graphql
 
 
 #################################################
@@ -101,7 +111,12 @@ COPY --from=fastapi_builder $PYSETUP_PATH $PYSETUP_PATH
 WORKDIR /app
 EXPOSE 8000
 COPY ./app /app/
-CMD opentelemetry-instrument python main.py fastapi
+CMD python -m app fastapi
 ###################
-# NATS
+# GraphQL
 ##################
+FROM base as graphql_prd
+COPY --from=graphql_builder $PYSETUP_PATH $PYSETUP_PATH
+WORKDIR /app
+EXPOSE 8000
+CMD python -m app graphql
