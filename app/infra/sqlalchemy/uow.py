@@ -68,6 +68,11 @@ class SqlAlchemyTaskListRepository(TaskListRepository):
         res = await self.session.execute(stmt)
         return cast(list[TaskList], res.scalars().all())
 
+    async def find_user_task_list(self, *, user_id: int, pk: int) -> list[TaskList]:
+        stmt = select(TaskList).where(TaskList._pk == pk).where(TaskList._user_id == user_id)  # type: ignore[arg-type]  # noqa: SLF001
+        res = await self.session.execute(stmt)
+        return cast(list[TaskList], res.scalars().all())
+
 
 @inject(alias=Uow, use_factory=True)
 class SqlAlchemyUow(Uow):

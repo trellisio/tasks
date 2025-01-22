@@ -17,6 +17,7 @@ task_list = Table(
     Column("name", String(255), nullable=False, index=True),
     Column("statuses", JSON, nullable=True),
     Column("default_status", String(255), nullable=True),
+    Column("user_id", String(255), nullable=False),
 )
 
 task = Table(
@@ -48,6 +49,7 @@ def add_model_mappings() -> None:
             "_name": task_list.c.name,
             "_statuses": task_list.c.statuses,
             "_default_status": task_list.c.default_status,
+            "_user_id": task_list.c.default_status,
         },
     )
     mapper_registry.map_imperatively(

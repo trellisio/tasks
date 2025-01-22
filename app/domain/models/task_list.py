@@ -12,19 +12,22 @@ class TaskList(Aggregate):
     _pk: int | None
     _statuses: set[str]
     _default_status: str | None
+    _user_id: str
 
     def __init__(
         self,
         *,
         name: str,
+        user_id: str,
         pk: int | None = None,
         statuses: set[str] | None = None,
         default_status: str | None = None,
     ):
         super().__init__()
 
-        self._pk = pk
         self._name = name
+        self._user_id = user_id
+        self._pk = pk
 
         if not statuses:
             statuses = set()
@@ -40,6 +43,10 @@ class TaskList(Aggregate):
             msg = "TaskList pk is not set"
             raise ValueError(msg)
         return self._pk
+
+    @property
+    def user_id(self) -> str:
+        return self._user_id
 
     @property
     def name(self) -> str:

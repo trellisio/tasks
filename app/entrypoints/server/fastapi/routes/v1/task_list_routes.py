@@ -6,7 +6,7 @@ from kink import di, inject
 
 from app.services.task_list import v1
 
-from ...dependencies import Pagination, pagination
+from ...dependencies import Pagination, get_current_user, pagination
 
 
 class CreatedResourceDto(TypedDict):
@@ -31,8 +31,13 @@ class TaskListV1Routes(Routable):
         return await self.read_service.view_task_list_names(skip=pag["skip"], limit=pag["limit"], serializer=dict)
 
     @post("/", status_code=201)
-    async def create_task_list(self, create_task_list: v1.dtos.CreateTaskListDto) -> CreatedResourceDto:
-        pk = await self.write_service.create_task_list(create_task_list)
+    async def create_task_list(
+        self,
+        *,
+        create_task_list: v1.dtos.CreateTaskListDto,
+        user_id: Annotated[str, Depends(get_current_user)],
+    ) -> CreatedResourceDto:
+        pk = await self.write_service.create_task_list(user_id=user_id, create_task_list=create_task_list)
         return {"pk": pk}
 
     @put("/{list_id}")
@@ -41,6 +46,7 @@ class TaskListV1Routes(Routable):
         *,
         list_id: int,
         update_task_list: v1.dtos.UpdateTaskListDto,
+        user_id: Annotated[str, Depends(get_current_user)],
     ) -> v1.dtos.TaskListOutputDto:
         return await self.write_service.update_task_list(task_list_id=list_id, update_task_list=update_task_list)
 
@@ -50,6 +56,7 @@ class TaskListV1Routes(Routable):
         *,
         list_id: int,
         add_status: v1.dtos.AddTaskListStatusDto,
+        user_id: Annotated[str, Depends(get_current_user)],
     ) -> v1.dtos.TaskListOutputDto:
         return await self.write_service.add_task_list_status(task_list_id=list_id, status=add_status)
 
@@ -59,6 +66,7 @@ class TaskListV1Routes(Routable):
         *,
         list_id: int,
         status: v1.dtos.RemoveTaskListStatusDto,
+        user_id: Annotated[str, Depends(get_current_user)],
     ) -> v1.dtos.TaskListOutputDto:
         return await self.write_service.remove_task_list_status(task_list_id=list_id, status=status)
 
@@ -67,7 +75,13 @@ class TaskListV1Routes(Routable):
         return await self.read_service.view_task_list(list_id=list_id, serializer=dict)
 
     @post("/{list_id}/tasks", status_code=201)
-    async def create_task(self, *, list_id: int, create_task: v1.dtos.CreateTaskDto) -> CreatedResourceDto:
+    async def create_task(
+        self,
+        *,
+        list_id: int,
+        create_task: v1.dtos.CreateTaskDto,
+        user_id: Annotated[str, Depends(get_current_user)],
+    ) -> CreatedResourceDto:
         pk = await self.write_service.create_task(task_list_id=list_id, create_task=create_task)
         return {"pk": pk}
 
@@ -94,6 +108,7 @@ class TaskListV1Routes(Routable):
         list_id: int,  # noqa: ARG002
         task_id: int,
         update_task: v1.dtos.UpdateTaskDto,
+        user_id: Annotated[str, Depends(get_current_user)],
     ) -> v1.dtos.TaskOutputDto:
         return await self.write_service.update_task(task_id=task_id, update_task=update_task)
 

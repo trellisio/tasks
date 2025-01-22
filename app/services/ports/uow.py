@@ -114,6 +114,10 @@ class TaskListRepository(Repository[TaskList], ABC):
     async def find_by_name(self, name: str) -> list[TaskList]:
         raise NotImplementedError
 
+    @abstractmethod
+    async def find_user_task_list(self, *, user_id: int, pk: int) -> list[TaskList]:
+        raise NotImplementedError
+
 
 class TaskDao(ports.TaskDao, ABC):
     @abstractmethod

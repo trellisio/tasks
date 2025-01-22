@@ -14,3 +14,5 @@
 -- Scheduled Tasks
 -- concept of a user
 -- indexes with user
+-- test adapters
+-- move add_tasks to DAO

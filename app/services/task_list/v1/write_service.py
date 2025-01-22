@@ -15,9 +15,10 @@ class TaskListWriteService:
     def __init__(self, uow: Uow):
         self.uow = uow
 
-    async def create_task_list(self, create_task_list: dtos.CreateTaskListDto) -> int:
+    async def create_task_list(self, *, user_id: str, create_task_list: dtos.CreateTaskListDto) -> int:
         task_list = TaskList(
             name=create_task_list.name,
+            user_id=user_id,
             statuses=list(create_task_list.statuses) if create_task_list.statuses else None,
             default_status=create_task_list.default_status,
         )
@@ -31,11 +32,12 @@ class TaskListWriteService:
     async def update_task_list(
         self,
         *,
+        user_id: str,
         task_list_id: int,
         update_task_list: dtos.UpdateTaskListDto,
     ) -> dtos.TaskListOutputDto:
         async with self.uow:
-            task_list = await self._get_task_list(task_list_id)
+            task_list = await self._get_task_list(task_list_id=task_list_id, user_id=user_id)
             task_list.name = update_task_list.name or task_list.name
             task_list.default_status = update_task_list.default_status or task_list.default_status
 
@@ -51,11 +53,12 @@ class TaskListWriteService:
     async def add_task_list_status(
         self,
         *,
+        user_id: str,
         task_list_id: int,
         status: dtos.AddTaskListStatusDto,
     ) -> dtos.TaskListOutputDto:
         async with self.uow:
-            task_list = await self._get_task_list(task_list_id)
+            task_list = await self._get_task_list(task_list_id=task_list_id, user_id=user_id)
             task_list.add_status(status.status)
 
             await self.uow.commit()
@@ -70,11 +73,12 @@ class TaskListWriteService:
     async def remove_task_list_status(
         self,
         *,
+        user_id: str,
         task_list_id: int,
         status: dtos.RemoveTaskListStatusDto,
     ) -> dtos.TaskListOutputDto:
         async with self.uow:
-            task_list = await self._get_task_list(task_list_id)
+            task_list = await self._get_task_list(task_list_id=task_list_id, user_id=user_id)
             await task_list.remove_status(status=status.status, dao=self.uow.task_dao)
             logger.info(f"Removed status {status.status} from task list {task_list_id}. Tasks updated.")
 
@@ -87,12 +91,9 @@ class TaskListWriteService:
                 default_status=task_list.default_status,
             )
 
-    async def create_task(self, *, task_list_id: int, create_task: dtos.CreateTaskDto) -> int:
+    async def create_task(self, *, user_id: str, task_list_id: int, create_task: dtos.CreateTaskDto) -> int:
         async with self.uow:
-            task_list = await self.uow.task_list_repository.find(task_list_id)
-            if not task_list:
-                logger.error(f"Task list {task_list_id} does not exist")
-                raise errors.NoResourceError(msg=f"Task list {task_list_id} does not exist")
+            task_list = await self._get_task_list(task_list_id=task_list_id, user_id=user_id)
 
             task = Task(
                 title=create_task.title,
@@ -106,7 +107,7 @@ class TaskListWriteService:
 
             return task.pk
 
-    async def update_task(self, *, task_id: int, update_task: dtos.UpdateTaskDto) -> dtos.TaskOutputDto:
+    async def update_task(self, *, user_id: str, task_id: int, update_task: dtos.UpdateTaskDto) -> dtos.TaskOutputDto:
         async with self.uow:
             task = await self.uow.task_dao.get_task(task_id)
             if not task:
@@ -131,8 +132,8 @@ class TaskListWriteService:
             )
 
     # Utils
-    async def _get_task_list(self, task_list_id: int) -> TaskList:
-        task_lists = await self.uow.task_list_repository.find(task_list_id)
+    async def _get_task_list(self, *, user_id: str, task_list_id: int) -> TaskList:
+        task_lists = await self.uow.task_list_repository.find_user_task_list(user_id=user_id, pk=task_list_id)
         if not task_lists:
             logger.error(f"Task list {task_list_id} does not exist")
             raise errors.NoResourceError(msg=f"Task list {task_list_id} does not exist")
